@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Catálogo Comercial - Taller trazabilidad">
-    <title>trazabilidad - Catálogo Comercial</title>
+    <meta name="description" content="Catálogo Comercial - Taller coanda">
+    <title>coanda - Catálogo Comercial</title>
     <script>
         (function() {
-            const sessionStr = localStorage.getItem('trazabilidad_session');
+            const sessionStr = localStorage.getItem('coanda_session');
             if (!sessionStr) {
                 window.location.href = '/login.html';
                 return;
@@ -18,7 +18,7 @@
                     window.location.href = '/index.html';
                 }
             } catch (e) {
-                localStorage.removeItem('trazabilidad_session');
+                localStorage.removeItem('coanda_session');
                 window.location.href = '/login.html';
             }
         })();
@@ -38,7 +38,7 @@
         .maquina-card {
             transition: all 0.3s ease;
             background-color: #ffffff !important;
-            border: 1px solid var(--trazabilidad-border) !important;
+            border: 1px solid var(--coanda-border) !important;
         }
         .maquina-card.disponible:hover {
             transform: translateY(-5px);
@@ -138,10 +138,10 @@
 <body>
 
     <!-- BARRA DE NAVEGACIÓN -->
-    <nav class="navbar navbar-dark bg-trazabilidad fixed-top shadow">
+    <nav class="navbar navbar-dark bg-coanda fixed-top shadow">
         <div class="container-fluid">
             <span class="navbar-brand fw-bold text-white" id="navBrand">
-                <i class="bi bi-shop me-2"></i>trazabilidad Catálogo Comercial
+                <i class="bi bi-shop me-2"></i>coanda Catálogo Comercial
             </span>
             <div class="d-flex align-items-center gap-3">
                 <span class="text-white small d-none d-sm-inline">
@@ -289,7 +289,7 @@
     <!-- Footer Profesional -->
     <footer class="site-footer">
         <div class="container-fluid text-center">
-            <span><span class="text-negro">Web creada y gestionada por </span><span class="author-verde">Alonso Feria Arriaza</span><span class="text-negro"> — trazabilidad </span><span class="author-verde">© 2026</span></span>
+            <span><span class="text-negro">Web creada y gestionada por </span><span class="author-verde">Alonso Feria Arriaza</span><span class="text-negro"> — coanda </span><span class="author-verde">© 2026</span></span>
         </div>
     </footer>
 
@@ -306,7 +306,7 @@
         // ─── Sesión ───────────────────────────────────────────
         let session = {};
         try {
-            session = JSON.parse(localStorage.getItem('trazabilidad_session') || '{}');
+            session = JSON.parse(localStorage.getItem('coanda_session') || '{}');
         } catch(e) {}
         const esSupervisor = session.role === 'SUPERVISOR_COMERCIAL';
         const nombreUsuario = session.username || 'Comercial';
@@ -320,7 +320,7 @@
                 document.getElementById('supervisorBanner').classList.remove('d-none');
                 document.getElementById('supervisorTabs').classList.remove('d-none');
                 document.getElementById('tituloCatalogo').textContent = 'Panel Comercial — Supervisor';
-                document.getElementById('navBrand').innerHTML = '<i class="bi bi-shield-check me-2"></i>trazabilidad · Supervisor Comercial';
+                document.getElementById('navBrand').innerHTML = '<i class="bi bi-shield-check me-2"></i>coanda · Supervisor Comercial';
             }
 
             // Contador de caracteres del textarea
@@ -700,11 +700,12 @@
 
         function cerrarSesion(event) {
             if (event) event.preventDefault();
-            localStorage.removeItem('trazabilidad_session');
+            localStorage.removeItem('coanda_session');
             window.location.href = '/login.html';
         }
     </script>
 
 </body>
 </html>
+
 

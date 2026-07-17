@@ -1,11 +1,11 @@
 ========================================================================
-             SISTEMA DE GESTIÓN DE INVENTARIO Y TRAZABILIDAD QR
-                              trazabilidad - 2026
+             SISTEMA DE GESTIÓN DE INVENTARIO Y coanda QR
+                              coanda - 2026
 ========================================================================
 
 Este documento sirve como manual general del usuario y de referencia para el
 taller y el equipo comercial. El sistema permite el control de entrada de
-máquinas, la extracción y trazabilidad de piezas (fungibles), la gestión de stock
+máquinas, la extracción y coanda de piezas (fungibles), la gestión de stock
 de tóneres con representación gráfica del nivel de consumible, y el control
 estricto de accesos basado en roles (RBAC).
 
@@ -42,7 +42,7 @@ A) ROL: TÉCNICO
        Cualquier intento de navegación directa le redirigirá al taller.
 
 B) ROL: COMERCIAL
-   - Contraseña de Acceso: trazabilidad2026
+   - Contraseña de Acceso: coanda2026
    - Permisos y Acceso:
      * Al iniciar sesión, es redirigido directamente al catálogo comercial
        ("comercial.html").
@@ -60,7 +60,7 @@ B) ROL: COMERCIAL
 ------------------------------------------------------------------------
 3. FUNCIONALIDADES CLAVE Y REGLAS DE NEGOCIO
 ------------------------------------------------------------------------
-- Trazabilidad Inversa:
+- coanda Inversa:
   Las piezas extraídas de una máquina madre conservan su número de serie
   de origen, permitiendo rastrear la procedencia de cada repuesto.
 
@@ -79,4 +79,5 @@ B) ROL: COMERCIAL
   LocalStorage para prevenir pérdida de información por fallos de red
   o recargas involuntarias del navegador en entornos móviles.
 ========================================================================
+
 

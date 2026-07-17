@@ -4,7 +4,7 @@ setlocal EnabledDelayedExpansion
 cd /d "%~dp0"
 
 echo =======================================================
-echo   Iniciando Aplicacion trazabilidad - Gestion de Inventario
+echo   Iniciando Aplicacion coanda - Gestion de Inventario
 echo =======================================================
 
 :: 1. Detectar o verificar JAVA_HOME
@@ -56,4 +56,5 @@ if %ERRORLEVEL% neq 0 (
 )
 
 pause
+
 
