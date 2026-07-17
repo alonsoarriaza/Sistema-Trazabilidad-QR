@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   ESTILOS PERSONALIZADOS — Sistema de coanda QR coanda
+   ESTILOS PERSONALIZADOS — Sistema de techcorp QR techcorp
    
    Estos estilos complementan Bootstrap 5.3 para crear una interfaz
    oscura, táctil y legible diseñada para el uso con móvil en el
@@ -9,27 +9,27 @@
 
 /* ─────────── Variables de color del proyecto ─────────── */
 :root {
-    --coanda-primary: #20bf55;        /* Verde brillante y vibrante */
-    --coanda-dark: #f3f5f8;           /* Fondo gris claro oficial de coanda.es */
-    --coanda-card: #ffffff;           /* Tarjetas en blanco puro */
-    --coanda-header: #e8f5eb;         /* Verde suave para cabeceras */
-    --coanda-input: #ffffff;          /* Fondo de inputs en blanco */
-    --coanda-border: #e5e7eb;         /* Bordes en gris claro oficial */
-    --coanda-text: #2e2e2e;           /* Texto oscuro corporativo */
-    --coanda-accent: #20bf55;         /* Verde brillante acento */
+    --techcorp-primary: #20bf55;        /* Verde brillante y vibrante */
+    --techcorp-dark: #f3f5f8;           /* Fondo gris claro oficial de techcorp.es */
+    --techcorp-card: #ffffff;           /* Tarjetas en blanco puro */
+    --techcorp-header: #e8f5eb;         /* Verde suave para cabeceras */
+    --techcorp-input: #ffffff;          /* Fondo de inputs en blanco */
+    --techcorp-border: #e5e7eb;         /* Bordes en gris claro oficial */
+    --techcorp-text: #2e2e2e;           /* Texto oscuro corporativo */
+    --techcorp-accent: #20bf55;         /* Verde brillante acento */
 }
 
 /* ─────────── Base del documento ─────────── */
 body {
-    background-color: var(--coanda-dark);
-    color: var(--coanda-text);
+    background-color: var(--techcorp-dark);
+    color: var(--techcorp-text);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
 }
 
 /* ─────────── Barra de navegación ─────────── */
-.bg-coanda {
+.bg-techcorp {
     background: linear-gradient(135deg, #169b40 0%, #20bf55 100%) !important;
     border-bottom: 3px solid #86efac;
 }
@@ -144,25 +144,25 @@ body {
 
 /* ─────────── Tarjetas de formulario ─────────── */
 .bg-card {
-    background-color: var(--coanda-card) !important;
-    border: 1px solid var(--coanda-border) !important;
+    background-color: var(--techcorp-card) !important;
+    border: 1px solid var(--techcorp-border) !important;
     border-radius: 12px !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
 }
 
 .bg-header {
-    background-color: var(--coanda-header) !important;
-    color: var(--coanda-accent) !important;
+    background-color: var(--techcorp-header) !important;
+    color: var(--techcorp-accent) !important;
     font-weight: 700;
     font-size: 1.1rem;
-    border-bottom: 2px solid var(--coanda-border) !important;
+    border-bottom: 2px solid var(--techcorp-border) !important;
 }
 
 /* ─────────── Campos de entrada ─────────── */
 .bg-input {
-    background-color: var(--coanda-input) !important;
+    background-color: var(--techcorp-input) !important;
     color: #212529 !important;
-    border: 2px solid var(--coanda-border) !important;
+    border: 2px solid var(--techcorp-border) !important;
     border-radius: 8px !important;
     transition: all 0.25s ease-in-out;
 }
@@ -173,7 +173,7 @@ body {
 
 .bg-input:focus {
     background-color: #ffffff !important;
-    border-color: var(--coanda-accent) !important;
+    border-color: var(--techcorp-accent) !important;
     box-shadow: 0 0 10px rgba(46, 125, 50, 0.3) !important;
     color: #212529 !important;
 }
@@ -225,13 +225,13 @@ select.bg-input {
     max-width: 400px;
     border-radius: 16px;
     overflow: hidden;
-    border: 3px solid var(--coanda-accent);
+    border: 3px solid var(--techcorp-accent);
     box-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
 }
 
 /* ─────────── Selector de niveles de estado ─────────── */
 .bg-nivel {
-    background-color: var(--coanda-input);
+    background-color: var(--techcorp-input);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -245,32 +245,32 @@ select.bg-input {
 }
 
 /* ─────────── Tablas de listado ─────────── */
-.table-dark-coanda {
-    --bs-table-bg: var(--coanda-card);
-    --bs-table-border-color: var(--coanda-border);
-    --bs-table-hover-bg: var(--coanda-header);
+.table-dark-techcorp {
+    --bs-table-bg: var(--techcorp-card);
+    --bs-table-border-color: var(--techcorp-border);
+    --bs-table-hover-bg: var(--techcorp-header);
     --bs-table-striped-bg: #1e2130;
-    color: var(--coanda-text);
+    color: var(--techcorp-text);
 }
 
-.table-dark-coanda thead {
-    background-color: var(--coanda-header);
-    border-bottom: 2px solid var(--coanda-accent);
+.table-dark-techcorp thead {
+    background-color: var(--techcorp-header);
+    border-bottom: 2px solid var(--techcorp-accent);
 }
 
-.table-dark-coanda tbody tr {
+.table-dark-techcorp tbody tr {
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
 
-.table-dark-coanda tbody tr:active {
+.table-dark-techcorp tbody tr:active {
     background-color: #2a3050 !important;
 }
 
 /* ─────────── Ficha de detalle ─────────── */
 .ficha-campo {
     padding: 12px 16px;
-    border-bottom: 1px solid var(--coanda-border);
+    border-bottom: 1px solid var(--techcorp-border);
 }
 
 .ficha-campo:last-child {
@@ -278,7 +278,7 @@ select.bg-input {
 }
 
 .ficha-label {
-    color: var(--coanda-accent);
+    color: var(--techcorp-accent);
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -287,7 +287,7 @@ select.bg-input {
 }
 
 .ficha-valor {
-    color: var(--coanda-text);
+    color: var(--techcorp-text);
     font-size: 1.1rem;
 }
 
@@ -365,7 +365,7 @@ select.bg-input {
 }
 
 .site-footer .author-verde {
-    color: var(--coanda-accent) !important;
+    color: var(--techcorp-accent) !important;
     font-weight: 700 !important;
 }
 
@@ -402,12 +402,12 @@ section {
 
 /* ─────────── Estilos de la Vista de Inicio y Elementos Premium ─────────── */
 .text-accent {
-    color: var(--coanda-accent) !important;
+    color: var(--techcorp-accent) !important;
 }
 
 .btn-accent {
-    background: linear-gradient(135deg, var(--coanda-accent) 0%, #10b981 100%) !important;
-    border-color: var(--coanda-accent) !important;
+    background: linear-gradient(135deg, var(--techcorp-accent) 0%, #10b981 100%) !important;
+    border-color: var(--techcorp-accent) !important;
     color: #ffffff !important;
     box-shadow: 0 4px 15px rgba(32, 191, 85, 0.2);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -444,7 +444,7 @@ section {
 }
 
 .btn-primary.btn-xl {
-    background: linear-gradient(135deg, var(--coanda-primary) 0%, #15803d 100%) !important;
+    background: linear-gradient(135deg, var(--techcorp-primary) 0%, #15803d 100%) !important;
     border: none;
     box-shadow: 0 4px 15px rgba(32, 191, 85, 0.2);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -464,23 +464,23 @@ section {
 
 /* Desactivar negrita excesiva para el contenido de texto en general y celdas */
 #resultadosBuscador table,
-.table-dark-coanda,
+.table-dark-techcorp,
 .list-group-item {
     font-size: 1.15rem !important; /* Letra un poco más grande */
 }
 
 /* Encabezados de tabla definidos */
 #resultadosBuscador th,
-.table-dark-coanda th {
+.table-dark-techcorp th {
     font-weight: 700 !important;
     color: #ffffff !important; /* Texto de cabecera en blanco sobre verde */
     padding: 14px !important;
-    background-color: var(--coanda-accent) !important; /* Fondo verde brillante */
+    background-color: var(--techcorp-accent) !important; /* Fondo verde brillante */
 }
 
 /* Celdas con texto limpio y negro de alto contraste sobre fondo blanco */
 #resultadosBuscador td,
-.table-dark-coanda td {
+.table-dark-techcorp td {
     font-weight: 500 !important; /* Peso regular/medio para lectura rápida */
     color: #2e2e2e !important;   /* Letra oscura para máxima legibilidad */
     padding: 14px !important;
@@ -488,7 +488,7 @@ section {
 
 /* Filas con hover claro y contrastado al pasar el cursor */
 #resultadosBuscador tbody tr:hover,
-.table-dark-coanda tbody tr:hover {
+.table-dark-techcorp tbody tr:hover {
     background-color: #f1f8f5 !important; /* Fondo verde sutil de hover */
 }
 
@@ -501,14 +501,14 @@ section {
 
 .list-group-item small {
     font-size: 0.95rem !important;
-    color: var(--coanda-accent) !important;
+    color: var(--techcorp-accent) !important;
 }
 
 /* Aumento de tamaño y contraste de etiquetas de formulario */
 .form-label {
     font-size: 1.15rem !important;
     font-weight: 600 !important;
-    color: var(--coanda-text) !important;
+    color: var(--techcorp-text) !important;
     margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -518,7 +518,7 @@ section {
 .form-control, .form-select {
     font-size: 1.15rem !important;
     font-weight: 500 !important;
-    color: var(--coanda-text) !important;
+    color: var(--techcorp-text) !important;
     background-color: #ffffff !important;
     border: 1px solid #ced4da !important;
 }
@@ -528,19 +528,19 @@ main h1, main h2, main h3, main h4, main h5, main h6,
 section h1, section h2, section h3, section h4, section h5, section h6,
 main .text-white, main .text-light, main .text-white-50,
 .form-label, label, .form-check-label, .text-light, .text-white-50 {
-    color: var(--coanda-text) !important;
+    color: var(--techcorp-text) !important;
 }
 
 /* Forzar que el texto escrito en los inputs sea visible */
 input, select, textarea {
-    color: var(--coanda-text) !important;
+    color: var(--techcorp-text) !important;
 }
 
 /* ─────────── Estilos del Módulo de Inventario ─────────── */
 .spin {
-    animation: coanda-spin 2s infinite linear;
+    animation: techcorp-spin 2s infinite linear;
 }
-@keyframes coanda-spin {
+@keyframes techcorp-spin {
     0% {
         transform: rotate(0deg);
     }
@@ -549,7 +549,7 @@ input, select, textarea {
     }
 }
 .btn-inv {
-    background: linear-gradient(135deg, var(--coanda-primary) 0%, #15803d 100%) !important;
+    background: linear-gradient(135deg, var(--techcorp-primary) 0%, #15803d 100%) !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(32, 191, 85, 0.2) !important;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -561,6 +561,7 @@ input, select, textarea {
 .btn-inv:active {
     transform: translateY(1px) !important;
 }
+
 
 
 

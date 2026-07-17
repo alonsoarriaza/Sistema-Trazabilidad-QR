@@ -1,6 +1,6 @@
-# Walkthrough - Evolución del Sistema de coanda QR coanda
+# Walkthrough - Evolución del Sistema de techcorp QR techcorp
 
-Se han completado e integrado con éxito todas las funcionalidades de evolución solicitadas para el taller coanda.
+Se han completado e integrado con éxito todas las funcionalidades de evolución solicitadas para el taller techcorp.
 
 ## Cambios Realizados
 
@@ -27,7 +27,7 @@ Se han completado e integrado con éxito todas las funcionalidades de evolución
 - **Devolución**: Al ver la ficha de una pieza extraída, aparece el botón "Dar de alta pieza (Devolver al almacén)" para reintegrarla al stock en un solo clic.
 
 ### 5. Rol Comercial (Fase 5)
-- **Autenticación con Spring Security**: Configurado `SecurityConfig.java` para proteger `/comercial.html` con rol `COMERCIAL` (usuario `comercial` / contraseña `coanda2026`). Las demás páginas e interfaces REST del taller permanecen abiertas.
+- **Autenticación con Spring Security**: Configurado `SecurityConfig.java` para proteger `/comercial.html` con rol `COMERCIAL` (usuario `comercial` / contraseña `techcorp2026`). Las demás páginas e interfaces REST del taller permanecen abiertas.
 - **Páginas**: Creadas las páginas `login.html` y `comercial.html` en el frontend.
 - **Catálogo comercial**: En `comercial.html` se muestran únicamente las máquinas que el técnico ha marcado como "Preparadas para Comercial" mediante el nuevo botón en la ficha de máquina.
 
@@ -45,7 +45,8 @@ Se han completado e integrado con éxito todas las funcionalidades de evolución
 2. **Comercial**:
    - Marque una máquina como preparada pulsando el botón "Preparada para Comercial" en la ficha de máquina.
    - Ingrese a `https://localhost:8443/comercial.html`. Será redirigido al formulario de Login.
-   - Inicie sesión con usuario `comercial` y clave `coanda2026`.
+   - Inicie sesión con usuario `comercial` y clave `techcorp2026`.
    - Compruebe que solo se visualizan en el catálogo las máquinas marcadas como preparadas, con su información técnica, estado visual y observaciones de venta.
+
 
 

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LÓGICA PRINCIPAL — Sistema de coanda QR coanda
+   LÓGICA PRINCIPAL — Sistema de techcorp QR techcorp
    
    Este archivo contiene toda la lógica del frontend:
      - Navegación entre vistas (SPA de una sola página).
@@ -883,7 +883,7 @@ function renderTablasMaquinas(maquinas) {
 
     // Se genera la tabla; igualamos las imágenes entre los datos
     // del servidor y la representación visual en el listado.
-    var html = '<table class="table table-dark-coanda table-hover">';
+    var html = '<table class="table table-dark-techcorp table-hover">';
     html += '<thead><tr>';
     html += '<th>QR</th><th>Marca</th><th>Modelo</th><th>Nº Serie</th><th>Decisión</th>';
     html += '</tr></thead><tbody>';
@@ -924,7 +924,7 @@ function cargarFichaMaquinaPorId(id) {
 }
 
 /**
- * Carga las piezas extraídas de una máquina concreta (coanda inversa).
+ * Carga las piezas extraídas de una máquina concreta (techcorp inversa).
  *
  * @param {string} numeroSerie - Número de serie de la máquina madre.
  */
@@ -1299,7 +1299,7 @@ function renderTablaPiezas(piezas) {
 
     // Se genera la tabla; igualamos las imágenes entre los datos
     // del servidor y la representación visual en el listado.
-    var html = '<table class="table table-dark-coanda table-hover">';
+    var html = '<table class="table table-dark-techcorp table-hover">';
     html += '<thead><tr>';
     html += '<th>Tipo</th><th>Nivel</th><th>Máquina</th><th>Ubicación</th>';
     html += '</tr></thead><tbody>';
@@ -2131,7 +2131,7 @@ function buscarGlobal(isAuto) {
 
         if (piezas.length > 0) {
             divPiezas.classList.remove('d-none');
-            var htmlPza = '<table class="table table-dark-coanda table-hover">';
+            var htmlPza = '<table class="table table-dark-techcorp table-hover">';
             htmlPza += '<thead><tr><th>Tipo</th><th>Nivel</th><th>Máquina origen</th><th>Ubicación</th><th>Estado</th></tr></thead><tbody>';
             piezas.forEach(function(p) {
                 htmlPza += '<tr onclick="cargarFichaPiezaPorId(' + p.id + ')">';
@@ -2151,7 +2151,7 @@ function buscarGlobal(isAuto) {
 
         if (toners.length > 0) {
             divToners.classList.remove('d-none');
-            var htmlToner = '<table class="table table-dark-coanda table-hover">';
+            var htmlToner = '<table class="table table-dark-techcorp table-hover">';
             htmlToner += '<thead><tr><th>Código QR</th><th>Modelo</th><th>Nivel</th><th>Ubicación</th><th>Estado</th></tr></thead><tbody>';
             toners.forEach(function(t) {
                 htmlToner += '<tr onclick="cargarFichaTonerPorId(' + t.id + ')" style="cursor: pointer;">';
@@ -2222,7 +2222,7 @@ function renderTablaHistorial(movimientos) {
         return;
     }
 
-    var html = '<table class="table table-dark-coanda table-hover">';
+    var html = '<table class="table table-dark-techcorp table-hover">';
     html += '<thead><tr>';
     html += '<th>Fecha y Hora</th><th>Entidad</th><th>ID / QR</th><th>Acción</th><th>Detalle</th><th>Responsable</th>';
     html += '</tr></thead><tbody>';
@@ -2443,7 +2443,7 @@ function ocultarResultadoEscaneo() {
  */
 function cerrarSesion(event) {
     if (event) event.preventDefault();
-    localStorage.removeItem('coanda_session');
+    localStorage.removeItem('techcorp_session');
     window.location.href = '/login.html';
 }
 
@@ -2451,7 +2451,7 @@ function cerrarSesion(event) {
  * Obtiene el nombre del técnico actual guardado en localStorage.
  */
 function obtenerTecnico() {
-    return localStorage.getItem('coanda_tecnico') || 'Técnico';
+    return localStorage.getItem('techcorp_tecnico') || 'Técnico';
 }
 
 /**
@@ -2459,7 +2459,7 @@ function obtenerTecnico() {
  */
 function guardarTecnico(nombre) {
     if (nombre) {
-        localStorage.setItem('coanda_tecnico', nombre);
+        localStorage.setItem('techcorp_tecnico', nombre);
         const nameEl = document.getElementById('nombreTecnicoNav');
         if (nameEl) {
             nameEl.textContent = nombre;
@@ -2473,7 +2473,7 @@ function guardarTecnico(nombre) {
 function mostrarModalTecnico() {
     const modalEl = document.getElementById('modalIdentificacionTecnico');
     if (modalEl) {
-        document.getElementById('inputNombreTecnico').value = localStorage.getItem('coanda_tecnico') || '';
+        document.getElementById('inputNombreTecnico').value = localStorage.getItem('techcorp_tecnico') || '';
         document.getElementById('errorNombreTecnico').classList.add('d-none');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
@@ -2521,14 +2521,14 @@ function guardarBorradorMaquina() {
             borrador[idCampo] = el.value;
         }
     });
-    localStorage.setItem('coanda_draft_maquina', JSON.stringify(borrador));
+    localStorage.setItem('techcorp_draft_maquina', JSON.stringify(borrador));
 }
 
 function restaurarBorradorMaquina() {
     const id = document.getElementById('maqId').value;
     if (id) return;
 
-    const borradorStr = localStorage.getItem('coanda_draft_maquina');
+    const borradorStr = localStorage.getItem('techcorp_draft_maquina');
     if (borradorStr) {
         try {
             const borrador = JSON.parse(borradorStr);
@@ -2545,7 +2545,7 @@ function restaurarBorradorMaquina() {
 }
 
 function limpiarBorradorMaquina() {
-    localStorage.removeItem('coanda_draft_maquina');
+    localStorage.removeItem('techcorp_draft_maquina');
 }
 
 function guardarBorradorPieza() {
@@ -2571,14 +2571,14 @@ function guardarBorradorPieza() {
         borrador['nivelEstado'] = nivelSeleccionado.value;
     }
 
-    localStorage.setItem('coanda_draft_pieza', JSON.stringify(borrador));
+    localStorage.setItem('techcorp_draft_pieza', JSON.stringify(borrador));
 }
 
 function restaurarBorradorPieza() {
     const id = document.getElementById('pzaId').value;
     if (id) return;
 
-    const borradorStr = localStorage.getItem('coanda_draft_pieza');
+    const borradorStr = localStorage.getItem('techcorp_draft_pieza');
     if (borradorStr) {
         try {
             const borrador = JSON.parse(borradorStr);
@@ -2601,7 +2601,7 @@ function restaurarBorradorPieza() {
 }
 
 function limpiarBorradorPieza() {
-    localStorage.removeItem('coanda_draft_pieza');
+    localStorage.removeItem('techcorp_draft_pieza');
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -2664,7 +2664,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Identificación del técnico al iniciar
-    const tecnicoActual = localStorage.getItem('coanda_tecnico');
+    const tecnicoActual = localStorage.getItem('techcorp_tecnico');
     if (!tecnicoActual) {
         setTimeout(function() {
             mostrarModalTecnico();
@@ -2708,7 +2708,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let tieneCambiosPieza = false;
 
         if (!maqId) {
-            const borradorMaq = localStorage.getItem('coanda_draft_maquina');
+            const borradorMaq = localStorage.getItem('techcorp_draft_maquina');
             if (borradorMaq) {
                 try {
                     const borrador = JSON.parse(borradorMaq);
@@ -2723,7 +2723,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (!pzaId) {
-            const borradorPza = localStorage.getItem('coanda_draft_pieza');
+            const borradorPza = localStorage.getItem('techcorp_draft_pieza');
             if (borradorPza) {
                 try {
                     const borrador = JSON.parse(borradorPza);
@@ -2823,7 +2823,7 @@ function renderTablaToners(toners) {
         return;
     }
 
-    let html = '<table class="table table-dark-coanda table-hover">';
+    let html = '<table class="table table-dark-techcorp table-hover">';
     html += '<thead><tr>';
     html += '<th>Código QR</th><th>Modelo</th><th>Nivel</th><th>Ubicación</th><th>Fecha Registro</th><th>Acciones</th>';
     html += '</tr></thead><tbody>';
@@ -3467,7 +3467,7 @@ function renderTablaInventarioMaquinas(maquinas) {
     if (maquinas.length === 0) {
         return '<div class="text-center text-secondary py-5"><i class="bi bi-inbox fs-1 d-block mb-3"></i>No hay máquinas registradas.</div>';
     }
-    let html = '<table class="table table-dark-coanda table-hover">';
+    let html = '<table class="table table-dark-techcorp table-hover">';
     html += '<thead><tr><th>QR</th><th>Marca</th><th>Modelo</th><th>Nº Serie</th><th>Decisión</th><th>Ubicación</th></tr></thead>';
     html += '<tbody>';
     maquinas.forEach(function(m) {
@@ -3488,7 +3488,7 @@ function renderTablaInventarioPiezas(piezas) {
     if (piezas.length === 0) {
         return '<div class="text-center text-secondary py-5"><i class="bi bi-inbox fs-1 d-block mb-3"></i>No hay piezas en el almacén.</div>';
     }
-    let html = '<table class="table table-dark-coanda table-hover">';
+    let html = '<table class="table table-dark-techcorp table-hover">';
     html += '<thead><tr><th>Código QR</th><th>Tipo</th><th>Nivel</th><th>Máquina Origen</th><th>Referencia</th><th>Ubicación</th></tr></thead>';
     html += '<tbody>';
     piezas.forEach(function(p) {
@@ -3509,7 +3509,7 @@ function renderTablaInventarioToneres(toneres) {
     if (toneres.length === 0) {
         return '<div class="text-center text-secondary py-5"><i class="bi bi-inbox fs-1 d-block mb-3"></i>No hay tóneres en stock.</div>';
     }
-    let html = '<table class="table table-dark-coanda table-hover">';
+    let html = '<table class="table table-dark-techcorp table-hover">';
     html += '<thead><tr><th>Código QR</th><th>Modelo</th><th>Nivel</th><th>Ubicación</th><th>Estado</th><th>Máquina Origen</th></tr></thead>';
     html += '<tbody>';
     toneres.forEach(function(t) {
@@ -3619,6 +3619,7 @@ function aplicarParametrosUrlFormMaquina() {
         }
     }
 }
+
 
 
 

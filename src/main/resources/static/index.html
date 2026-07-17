@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="Sistema de Gestión de Inventario y coanda QR - Taller coanda">
-    <title>coanda - Gestión de Inventario QR</title>
+    <meta name="description" content="Sistema de Gestión de Inventario y techcorp QR - Taller techcorp">
+    <title>techcorp - Gestión de Inventario QR</title>
     <script>
         (function() {
-            const sessionStr = localStorage.getItem('coanda_session');
+            const sessionStr = localStorage.getItem('techcorp_session');
             if (!sessionStr) {
                 window.location.href = '/login.html';
                 return;
@@ -19,7 +19,7 @@
                     window.location.href = '/comercial.html';
                 }
             } catch (e) {
-                localStorage.removeItem('coanda_session');
+                localStorage.removeItem('techcorp_session');
                 window.location.href = '/login.html';
             }
         })();
@@ -39,11 +39,11 @@
 
     <!-- ═══════════════════════════════════════════════════════════
          BARRA DE NAVEGACIÓN SUPERIOR
-         Barra fija con el logotipo de coanda y el menú principal.
+         Barra fija con el logotipo de techcorp y el menú principal.
          Se utiliza el componente navbar de Bootstrap con clase
          navbar-dark para contraste sobre el fondo oscuro.
          ═══════════════════════════════════════════════════════════ -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-coanda fixed-top shadow">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-techcorp fixed-top shadow">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-white fs-4" href="#" onclick="mostrarVista('inicio')">
                 <i class="bi bi-qr-code-scan me-2 animate-pulse"></i>Control de Almacén
@@ -111,8 +111,8 @@
                 <div class="logo-container mb-4">
                     <i class="bi bi-qr-code-scan text-accent display-1 animate-pulse"></i>
                 </div>
-                <h1 class="h2 fw-bold text-white mb-2">Taller coanda</h1>
-                <p class="text-secondary mb-5">Gestión de Inventario y coanda QR</p>
+                <h1 class="h2 fw-bold text-white mb-2">Taller techcorp</h1>
+                <p class="text-secondary mb-5">Gestión de Inventario y techcorp QR</p>
 
                 <div class="row g-4 justify-content-center">
                     <div class="col-12 col-md-8 col-lg-6">
@@ -493,7 +493,7 @@
 
                 <div class="card bg-card mb-3">
                     <div class="card-header bg-header">
-                        <i class="bi bi-link-45deg me-2"></i>coanda (Máquina de Origen)
+                        <i class="bi bi-link-45deg me-2"></i>techcorp (Máquina de Origen)
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -1019,7 +1019,7 @@
     <footer class="site-footer">
         <div class="container-fluid">
             <span><span class="text-negro">Web creada y gestionada por </span><span class="author-verde">Alonso Feria
-                    Arriaza</span><span class="text-negro"> — coanda </span><span class="author-verde">©
+                    Arriaza</span><span class="text-negro"> — techcorp </span><span class="author-verde">©
                     2026</span></span>
         </div>
     </footer>
@@ -1254,4 +1254,5 @@
 </body>
 
 </html>
+
 
