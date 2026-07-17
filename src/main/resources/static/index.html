@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Sistema de Gestión de Inventario y Trazabilidad QR - Taller trazabilidad">
+    <title>trazabilidad - Gestión de Inventario QR</title>
+    <script>
+        (function() {
+            const sessionStr = localStorage.getItem('trazabilidad_session');
+            if (!sessionStr) {
+                window.location.href = '/login.html';
+                return;
+            }
+            try {
+                const session = JSON.parse(sessionStr);
+                if (session.role !== 'TECNICO') {
+                    window.location.href = '/comercial.html';
+                }
+            } catch (e) {
+                localStorage.removeItem('trazabilidad_session');
+                window.location.href = '/login.html';
+            }
+        })();
+    </script>
+
+    <!-- Bootstrap 5.3 via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Estilos personalizados del proyecto -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BARRA DE NAVEGACIÓN SUPERIOR
+         Barra fija con el logotipo de trazabilidad y el menú principal.
+         Se utiliza el componente navbar de Bootstrap con clase
+         navbar-dark para contraste sobre el fondo oscuro.
+         ═══════════════════════════════════════════════════════════ -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-trazabilidad fixed-top shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white fs-4" href="#" onclick="mostrarVista('inicio')">
+                <i class="bi bi-qr-code-scan me-2 animate-pulse"></i>Control de Almacén
+            </a>
+            <button class="navbar-toggler border-white-50" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div
+                    class="d-flex flex-column flex-lg-row gap-2 mt-2 mt-lg-0 ms-auto navbar-buttons align-items-lg-center">
+                    <span id="badgeTecnico" class="btn btn-outline-warning btn-sm px-3 py-2" style="cursor: pointer;"
+                        onclick="mostrarModalTecnico()">
+                        <i class="bi bi-person-badge me-1"></i><span id="nombreTecnicoNav">Técnico</span>
+                    </span>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('inicio')">
+                        <i class="bi bi-house-door me-1"></i>Inicio
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('scanner')">
+                        <i class="bi bi-qr-code-scan me-1"></i>Escáner
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('buscador')">
+                        <i class="bi bi-search me-1"></i>Buscador
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('reimpresion')">
+                        <i class="bi bi-printer me-1"></i>Imprimir Etiquetas
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('listaMaquinas')">
+                        <i class="bi bi-printer-fill me-1"></i>Máquinas
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('listaPiezas')">
+                        <i class="bi bi-gear-fill me-1"></i>Piezas
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('listaToners')">
+                        <i class="bi bi-droplet-fill me-1"></i>Tóneres
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('listaHistorial')">
+                        <i class="bi bi-clock-history me-1"></i>Historial
+                    </button>
+                    <button class="btn btn-outline-light btn-sm px-3 py-2" onclick="mostrarVista('inventario')">
+                        <i class="bi bi-boxes me-1"></i>Inventario
+                    </button>
+                    <button class="btn btn-danger btn-sm px-3 py-2" onclick="cerrarSesion(event)">
+                        <i class="bi bi-box-arrow-right me-1"></i>Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CONTENEDOR PRINCIPAL
+         Todas las vistas del sistema se renderizan aquí dentro.
+         Solo una vista es visible a la vez; las demás permanecen
+         ocultas con la clase CSS "d-none".
+         ═══════════════════════════════════════════════════════════ -->
+    <main class="container-fluid contenedor-principal">
+
+        <!-- ─────────── VISTA: INICIO ─────────── -->
+        <section id="vistaInicio" class="vista-activa">
+            <div class="text-center py-5">
+                <div class="logo-container mb-4">
+                    <i class="bi bi-qr-code-scan text-accent display-1 animate-pulse"></i>
+                </div>
+                <h1 class="h2 fw-bold text-white mb-2">Taller trazabilidad</h1>
+                <p class="text-secondary mb-5">Gestión de Inventario y Trazabilidad QR</p>
+
+                <div class="row g-4 justify-content-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <button class="btn btn-primary btn-xl w-100 flex-column gap-3 py-4"
+                            onclick="abrirFormMaquinaConQr('')">
+                            <i class="bi bi-plus-circle-fill fs-1 text-accent animate-pulse"></i>
+                            <span class="fs-4">Dar entrada a máquina</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenedor de Notificaciones de Devolución Comercial -->
+                <div id="contenedorNotificacionesDevolucion" class="row g-4 justify-content-center mt-4 d-none">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="card bg-card border-warning text-start">
+                            <div class="card-header bg-warning text-dark fw-bold">
+                                <i class="bi bi-bell-fill me-2"></i>Devoluciones de Comercial
+                            </div>
+                            <div class="card-body p-0" id="listaDevolucionesComercial">
+                                <!-- Se rellena dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: ESCÁNER QR ─────────── -->
+        <section id="vistaScanner" class="d-none">
+            <div class="text-center mb-4">
+                <h1 class="h3 fw-bold text-white">
+                    <i class="bi bi-qr-code-scan me-2"></i>Escanear Código QR
+                </h1>
+                <p class="text-secondary">
+                    Apunte la cámara al código QR de la máquina o pieza.
+                </p>
+            </div>
+
+            <!-- Contenedor del lector QR (html5-qrcode) -->
+            <div id="lectorQr" class="mx-auto mb-4"></div>
+
+            <!-- Resultado del escaneo -->
+            <div id="resultadoEscaneo" class="d-none">
+                <div class="alert alert-info d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                    <span id="textoResultadoEscaneo"></span>
+                </div>
+            </div>
+
+            <!-- Botones de acción del escáner -->
+            <div class="d-grid gap-3 mt-3">
+                <button id="btnIniciarScanner" class="btn btn-success btn-xl" onclick="iniciarScanner()">
+                    <i class="bi bi-camera-fill me-2"></i>Iniciar Cámara
+                </button>
+                <button id="btnDetenerScanner" class="btn btn-danger btn-xl d-none" onclick="detenerScanner()">
+                    <i class="bi bi-stop-circle-fill me-2"></i>Detener Cámara
+                </button>
+            </div>
+
+            <!-- Input manual como alternativa al escáner -->
+            <div class="card bg-card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title text-white">
+                        <i class="bi bi-keyboard me-2"></i>Entrada manual
+                    </h5>
+                    <div class="input-group input-group-lg">
+                        <input type="text" id="inputQrManual"
+                            class="form-control form-control-lg bg-input text-white border-secondary"
+                            placeholder="Escribir código QR...">
+                        <button class="btn btn-primary btn-lg" onclick="buscarPorQrManual()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: FORMULARIO DE MÁQUINA ─────────── -->
+        <section id="vistaFormMaquina" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-printer me-2"></i>
+                    <span id="tituloFormMaquina">Nueva Máquina</span>
+                </h1>
+                <button class="btn btn-outline-secondary" onclick="event.preventDefault(); window.history.back();">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </button>
+            </div>
+
+            <form id="formMaquina" onsubmit="guardarMaquina(event)" class="needs-validation" novalidate>
+                <!-- ID oculto para edición -->
+                <input type="hidden" id="maqId">
+                <input type="hidden" id="maqPreparadaComercial">
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-upc-scan me-2"></i>Identificación
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="maqCodigoQr" class="form-label text-light">Código QR</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="maqCodigoQr" readonly required>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="maqMarca" class="form-label text-light">Marca</label>
+                                <select class="form-select form-select-lg bg-white text-dark border-secondary"
+                                    id="maqMarca" required style="background-color: #ffffff !important; color: #000000 !important;">
+                                    <option value="" style="background-color: #ffffff !important; color: #000000 !important;">-- Seleccione marca --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="maqModelo" class="form-label text-light">Modelo</label>
+                                <input type="text"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="maqModelo" list="listModelos" required>
+                                <datalist id="listModelos"></datalist>
+                                <div id="compatiblesContainer" class="mt-2 d-flex flex-wrap gap-1"></div>
+                            </div>
+
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="maqNumeroSerie" class="form-label text-light">Número de Serie</label>
+                                <input type="text"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="maqNumeroSerie" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="maqModeloToner" class="form-label text-light">Modelo de Tóner</label>
+                                <input type="text"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="maqModeloToner" placeholder="Ej: TK-510K">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="maqCopiasBn" class="form-label text-light"><i class="bi bi-circle-half me-1"></i>Copias B/N</label>
+                                <input type="number"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="maqCopiasBn" min="0" placeholder="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="maqCopiasColor" class="form-label text-light"><i class="bi bi-palette me-1"></i>Copias Color</label>
+                                <input type="number"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="maqCopiasColor" min="0" placeholder="0">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-building me-2"></i>Procedencia
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="maqClienteProcedencia" class="form-label text-light">Cliente de
+                                    Procedencia</label>
+                                <input type="text"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="maqClienteProcedencia">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="maqFechaEntrada" class="form-label text-light">Fecha de Entrada</label>
+                                <input type="date"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="maqFechaEntrada">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-clipboard2-pulse me-2"></i>Estado Técnico
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="maqEstadoFuncionamiento" class="form-label text-light">Estado de
+                                Funcionamiento</label>
+                            <select class="form-select form-select-lg bg-white text-dark border-secondary"
+                                id="maqEstadoFuncionamiento" style="background-color: #ffffff !important; color: #000000 !important;">
+                                <option value="" style="background-color: #ffffff !important; color: #000000 !important;">Seleccionar...</option>
+                                <option value="Funcional" style="background-color: #ffffff !important; color: #000000 !important;">Funcional</option>
+                                <option value="No enciende" style="background-color: #ffffff !important; color: #000000 !important;">No enciende</option>
+                                <option value="Atasco permanente" style="background-color: #ffffff !important; color: #000000 !important;">Atasco permanente</option>
+                                <option value="Error de sistema" style="background-color: #ffffff !important; color: #000000 !important;">Error de sistema</option>
+                                <option value="Parcialmente funcional" style="background-color: #ffffff !important; color: #000000 !important;">Parcialmente funcional</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="maqAveriasCodigos" class="form-label text-light">Averías o Códigos
+                                Conocidos</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="maqAveriasCodigos" placeholder="Ej: SC 552, E-001">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maqEstadoVisual" class="form-label text-light">Inspección Visual</label>
+                            <select class="form-select form-select-lg bg-white text-dark border-secondary"
+                                id="maqEstadoVisual" required style="background-color: #ffffff !important; color: #000000 !important;">
+                                <option value="" style="background-color: #ffffff !important; color: #000000 !important;">Seleccionar...</option>
+                                <option value="Óptimo" style="background-color: #ffffff !important; color: #000000 !important;">Óptimo (Bien)</option>
+                                <option value="Aceptable" style="background-color: #ffffff !important; color: #000000 !important;">Aceptable (Regular)</option>
+                                <option value="Deficiente" style="background-color: #ffffff !important; color: #000000 !important;">Deficiente (Mal)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="maqNivelToner" class="form-label text-light">Nivel de Tóner</label>
+                            <select class="form-select form-select-lg bg-white text-dark border-secondary"
+                                id="maqNivelToner" required style="background-color: #ffffff !important; color: #000000 !important;">
+                                <option value="" style="background-color: #ffffff !important; color: #000000 !important;">Seleccionar...</option>
+                                <option value="25%" style="background-color: #ffffff !important; color: #000000 !important;">25%</option>
+                                <option value="50%" style="background-color: #ffffff !important; color: #000000 !important;">50%</option>
+                                <option value="75%" style="background-color: #ffffff !important; color: #000000 !important;">75%</option>
+                                <option value="100%" style="background-color: #ffffff !important; color: #000000 !important;">100% (Lleno)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="maqDecisionTecnica" class="form-label text-light">Decisión Técnica</label>
+                            <select class="form-select form-select-lg bg-white text-dark border-secondary"
+                                id="maqDecisionTecnica" required style="background-color: #ffffff !important; color: #000000 !important;">
+                                <option value="" style="background-color: #ffffff !important; color: #000000 !important;">Seleccionar...</option>
+                                <option value="Cliente" style="background-color: #ffffff !important; color: #000000 !important;">Cliente</option>
+                                <option value="Almacén" style="background-color: #ffffff !important; color: #000000 !important;">Almacén</option>
+                                <option value="Despiece" style="background-color: #ffffff !important; color: #000000 !important;">Despiece</option>
+                                <option value="Reacondicionado" style="background-color: #ffffff !important; color: #000000 !important;">Reacondicionado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-geo-alt me-2"></i>Ubicación y Notas
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="maqUbicacionFisica" class="form-label text-light">Ubicación Física</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="maqUbicacionFisica" placeholder="Ej: Zona de recepción, Estantería B-3">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maqObservaciones" class="form-label text-light">Observaciones</label>
+                            <textarea class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="maqObservaciones" rows="3" placeholder="Anotaciones del técnico..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                    <button type="submit" class="btn btn-success btn-xl">
+                        <i class="bi bi-check-circle-fill me-2"></i>Guardar Máquina
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ─────────── VISTA: FICHA DE MÁQUINA (DETALLE) ─────────── -->
+        <section id="vistaFichaMaquina" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-printer me-2"></i>Ficha de Máquina
+                </h1>
+                <button class="btn btn-outline-secondary" onclick="event.preventDefault(); window.history.back();">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </button>
+            </div>
+
+            <div id="contenidoFichaMaquina"></div>
+
+            <!-- Sección de Extracción de Componentes -->
+            <div class="card bg-card mt-4 mb-3">
+                <div class="card-header bg-header">
+                    <i class="bi bi-gear-fill me-2"></i>Gestión / Extracción de Piezas
+                </div>
+                <div class="card-body">
+                    <p class="text-secondary mb-3">
+                        Marque los componentes que se van a extraer de esta máquina. Las piezas ya extraídas aparecerán
+                        abajo.
+                    </p>
+                    <div id="listaComponentesMaquina" class="d-flex flex-column gap-3">
+                        <!-- Rellenado dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de movimientos de la máquina -->
+            <div class="card bg-card mt-4 mb-3">
+                <div class="card-header bg-header">
+                    <i class="bi bi-clock-history me-2"></i>Historial de Movimientos
+                </div>
+                <div class="card-body p-0" id="historialMaquina">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4 mb-4">
+                <button class="btn btn-success btn-xl d-none" id="btnMarcarComercial">
+                    <i class="bi bi-check-all me-2"></i>Preparada para Comercial
+                </button>
+                <button class="btn btn-warning btn-xl" id="btnEditarMaquina">
+                    <i class="bi bi-pencil-square me-2"></i>Editar Máquina
+                </button>
+                <button class="btn btn-info btn-xl" id="btnVerPiezasMaquina">
+                    <i class="bi bi-gear me-2"></i>Ver Piezas Extraídas
+                </button>
+                <button class="btn btn-danger btn-xl" id="btnEliminarMaquina">
+                    <i class="bi bi-trash3-fill me-2"></i>Eliminar Máquina
+                </button>
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: FORMULARIO DE PIEZA ─────────── -->
+        <section id="vistaFormPieza" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-gear me-2"></i>
+                    <span id="tituloFormPieza">Nueva Pieza</span>
+                </h1>
+                <button class="btn btn-outline-secondary" onclick="event.preventDefault(); window.history.back();">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </button>
+            </div>
+
+            <form id="formPieza" onsubmit="guardarPieza(event)" class="needs-validation" novalidate>
+                <!-- ID oculto para edición -->
+                <input type="hidden" id="pzaId">
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-upc-scan me-2"></i>Identificación de la Pieza
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="pzaCodigoQrPieza" class="form-label text-light">Código QR de la Pieza</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="pzaCodigoQrPieza" required>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="pzaTipoPieza" class="form-label text-light">Tipo de Pieza</label>
+                                <select class="form-select form-select-lg bg-input text-white border-secondary"
+                                    id="pzaTipoPieza" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Fusor">Fusor</option>
+                                    <option value="Rodillo de presión">Rodillo de presión</option>
+                                    <option value="Rodillo de calor">Rodillo de calor</option>
+                                    <option value="Placa controladora">Placa controladora</option>
+                                    <option value="Bandeja superior">Bandeja superior</option>
+                                    <option value="Bandeja inferior">Bandeja inferior</option>
+                                    <option value="Tambor">Tambor</option>
+                                    <option value="Unidad de imagen">Unidad de imagen</option>
+                                    <option value="Motor principal">Motor principal</option>
+                                    <option value="Fuente de alimentación">Fuente de alimentación</option>
+                                    <option value="Panel de control">Panel de control</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pzaReferencia" class="form-label text-light">Referencia (si se
+                                    conoce)</label>
+                                <input type="text"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="pzaReferencia" placeholder="Nº de parte del fabricante">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pzaMarcaModeloCompatible" class="form-label text-light">Marca y Modelo
+                                Compatible</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="pzaMarcaModeloCompatible" placeholder="Ej: Ricoh MP C3004">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-link-45deg me-2"></i>Trazabilidad (Máquina de Origen)
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="pzaNumeroSerieMaquinaOrigen" class="form-label text-light">Nº de Serie de la
+                                Máquina de Origen</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="pzaNumeroSerieMaquinaOrigen" required>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="pzaProcedenciaEstadoMaquina" class="form-label text-light">Procedencia:
+                                    Estado de la Máquina</label>
+                                <select class="form-select form-select-lg bg-input text-white border-secondary"
+                                    id="pzaProcedenciaEstadoMaquina">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Funcionamiento">En funcionamiento</option>
+                                    <option value="Averiada">Averiada</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pzaCodigoAveriaMaquina" class="form-label text-light">Código de Avería de la
+                                    Máquina</label>
+                                <input type="text"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="pzaCodigoAveriaMaquina" placeholder="Ej: SC 552">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pzaRelacionAveriaPieza" class="form-label text-light">Relación de la Avería con
+                                la Pieza</label>
+                            <select class="form-select form-select-lg bg-input text-white border-secondary"
+                                id="pzaRelacionAveriaPieza">
+                                <option value="">Seleccionar...</option>
+                                <option value="Directamente afectada">Directamente afectada</option>
+                                <option value="Posible causa raíz">Posible causa raíz</option>
+                                <option value="Sin relación aparente">Sin relación aparente</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-speedometer me-2"></i>Estado y Clasificación
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label text-light">Nivel de Estado (Fungible)</label>
+                            <div class="d-grid gap-2">
+                                <div class="form-check form-check-lg p-3 rounded border border-success bg-nivel"
+                                    onclick="seleccionarNivel(1)">
+                                    <input class="form-check-input" type="radio" name="nivelEstado" id="nivel1"
+                                        value="1" required>
+                                    <label class="form-check-label text-white fs-5 ms-2" for="nivel1">
+                                        <span class="badge bg-success me-2">Nivel 1</span>
+                                        Buen estado aparente — Prioritaria para reutilización
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-lg p-3 rounded border border-warning bg-nivel"
+                                    onclick="seleccionarNivel(2)">
+                                    <input class="form-check-input" type="radio" name="nivelEstado" id="nivel2"
+                                        value="2">
+                                    <label class="form-check-label text-white fs-5 ms-2" for="nivel2">
+                                        <span class="badge bg-warning text-dark me-2">Nivel 2</span>
+                                        Estado aceptable — Apoyo / Pendiente de revisión
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-lg p-3 rounded border border-danger bg-nivel"
+                                    onclick="seleccionarNivel(3)">
+                                    <input class="form-check-input" type="radio" name="nivelEstado" id="nivel3"
+                                        value="3">
+                                    <label class="form-check-label text-white fs-5 ms-2" for="nivel3">
+                                        <span class="badge bg-danger me-2">Nivel 3</span>
+                                        Estado dudoso / Desgaste visible — Revisar o descartar
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pzaEstadoPieza" class="form-label text-light">Estado de la Pieza</label>
+                            <select class="form-select form-select-lg bg-input text-white border-secondary"
+                                id="pzaEstadoPieza" onchange="onCambioEstadoPiezaForm()">
+                                <option value="En almacén">En almacén</option>
+                                <option value="Para reparación">Para reparación</option>
+                                <option value="Para cliente">Para cliente</option>
+                                <option value="Instalada">Instalada</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="divPzaDestinoCliente">
+                            <label for="pzaDestinoCliente" class="form-label text-light">Destino del Cliente</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="pzaDestinoCliente" placeholder="Nombre/Ubicación del cliente a donde va la pieza">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-card mb-3">
+                    <div class="card-header bg-header">
+                        <i class="bi bi-geo-alt me-2"></i>Ubicación, Fechas y Notas
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="pzaUbicacionFisica" class="form-label text-light">Ubicación Física</label>
+                            <input type="text" class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="pzaUbicacionFisica" placeholder="Ej: Estantería A, Cajón B-2">
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="pzaFechaAlta" class="form-label text-light">Fecha de Alta</label>
+                                <input type="date"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="pzaFechaAlta">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pzaFechaUsoBaja" class="form-label text-light">Fecha de Uso o Baja</label>
+                                <input type="date"
+                                    class="form-control form-control-lg bg-input text-white border-secondary"
+                                    id="pzaFechaUsoBaja">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pzaObservaciones" class="form-label text-light">Observaciones</label>
+                            <textarea class="form-control form-control-lg bg-input text-white border-secondary"
+                                id="pzaObservaciones" rows="3" placeholder="Anotaciones del técnico..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                    <button type="submit" class="btn btn-success btn-xl">
+                        <i class="bi bi-check-circle-fill me-2"></i>Guardar Pieza
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ─────────── VISTA: FICHA DE PIEZA (DETALLE) ─────────── -->
+        <section id="vistaFichaPieza" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-gear me-2"></i>Ficha de Pieza
+                </h1>
+                <button class="btn btn-outline-secondary" onclick="event.preventDefault(); window.history.back();">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </button>
+            </div>
+
+            <div id="contenidoFichaPieza"></div>
+
+            <!-- Historial de movimientos de la pieza -->
+            <div class="card bg-card mt-4 mb-3">
+                <div class="card-header bg-header">
+                    <i class="bi bi-clock-history me-2"></i>Historial de Movimientos
+                </div>
+                <div class="card-body p-0" id="historialPieza">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4 mb-4">
+                <button class="btn btn-success btn-xl d-none" id="btnDevolverPieza">
+                    <i class="bi bi-box-arrow-in-down me-2"></i>Dar de alta pieza (Devolver al almacén)
+                </button>
+                <button class="btn btn-primary btn-xl" id="btnImprimirEtiquetaFicha">
+                    <i class="bi bi-printer me-2"></i>Imprimir Código QR
+                </button>
+                <button class="btn btn-warning btn-xl" id="btnEditarPieza">
+                    <i class="bi bi-pencil-square me-2"></i>Editar Pieza
+                </button>
+                <button class="btn btn-danger btn-xl" id="btnEliminarPieza">
+                    <i class="bi bi-trash3-fill me-2"></i>Eliminar Pieza
+                </button>
+            </div>
+
+            <!-- Resultado de evaluación de movimiento -->
+            <div id="resultadoEvaluacion" class="d-none mb-4"></div>
+        </section>
+
+        <!-- ─────────── VISTA: FICHA DE TÓNER (DETALLE) ─────────── -->
+        <section id="vistaFichaToner" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-droplet-fill me-2"></i>Ficha de Tóner
+                </h1>
+                <button class="btn btn-outline-secondary" onclick="event.preventDefault(); window.history.back();">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </button>
+            </div>
+
+            <div id="contenidoFichaToner"></div>
+
+            <div class="d-grid gap-2 mt-4 mb-4">
+                <button class="btn btn-primary btn-xl" id="btnImprimirEtiquetaTonerFicha">
+                    <i class="bi bi-printer me-2"></i>Imprimir Código QR
+                </button>
+                <button class="btn btn-danger btn-xl" id="btnEliminarTonerFicha">
+                    <i class="bi bi-trash3-fill me-2"></i>Eliminar Tóner
+                </button>
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: LISTADO DE MÁQUINAS ─────────── -->
+        <section id="vistaListaMaquinas" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-printer me-2"></i>Máquinas
+                </h1>
+            </div>
+
+            <!-- Buscador local e interactivo -->
+            <div class="row g-2 mb-3">
+                <div class="col-md-8">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-header text-white border-secondary">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="buscadorLocalMaquinas"
+                            class="form-control bg-input text-dark border-secondary"
+                            placeholder="Buscar máquina por marca, modelo, serie o QR..."
+                            oninput="filtrarMaquinasLocalmente()">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-lg">
+                        <label class="input-group-text bg-header text-white border-secondary">
+                            <i class="bi bi-funnel"></i>
+                        </label>
+                        <select class="form-select form-select-lg bg-input text-white border-secondary"
+                            id="filtroDecisionMaquina" onchange="filtrarMaquinas()">
+                            <option value="">Decisión (Todas)</option>
+                            <option value="Cliente">Cliente</option>
+                            <option value="Almacén">Almacén</option>
+                            <option value="Despiece">Despiece</option>
+                            <option value="Reacondicionado">Reacondicionado</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tablaMaquinas" class="table-responsive">
+                <!-- Se rellena dinámicamente por JS -->
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: LISTADO DE PIEZAS ─────────── -->
+        <section id="vistaListaPiezas" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-gear me-2"></i>Piezas
+                </h1>
+            </div>
+
+            <!-- Buscador local e interactivo -->
+            <div class="mb-3">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-header text-white border-secondary">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="buscadorLocalPiezas" class="form-control bg-input text-dark border-secondary"
+                        placeholder="Buscar pieza por tipo, referencia, compatibilidad o QR..."
+                        oninput="filtrarPiezasLocalmente()">
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <select class="form-select form-select-lg bg-input text-white border-secondary"
+                        id="filtroNivelPieza" onchange="filtrarPiezas()">
+                        <option value="">Nivel (Todos)</option>
+                        <option value="1">Nivel 1 — Buen estado</option>
+                        <option value="2">Nivel 2 — Aceptable</option>
+                        <option value="3">Nivel 3 — Dudoso</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <select class="form-select form-select-lg bg-input text-white border-secondary" id="filtroTipoPieza"
+                        onchange="filtrarPiezas()">
+                        <option value="">Tipo (Todos)</option>
+                        <option value="Fusor">Fusor</option>
+                        <option value="Rodillo de presión">Rodillo de presión</option>
+                        <option value="Rodillo de calor">Rodillo de calor</option>
+                        <option value="Placa controladora">Placa controladora</option>
+                        <option value="Tambor">Tambor</option>
+                        <option value="Unidad de imagen">Unidad de imagen</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="tablaPiezas" class="table-responsive">
+                <!-- Se rellena dinámicamente por JS -->
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: STOCK DE TÓNERES ─────────── -->
+        <section id="vistaListaToners" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-droplet-fill me-2"></i>Stock de Tóneres
+                </h1>
+                <button class="btn btn-success btn-lg" onclick="abrirModalManualToner()">
+                    <i class="bi bi-plus-circle me-1"></i>Nuevo Tóner
+                </button>
+            </div>
+
+            <!-- Buscador local e interactivo -->
+            <div class="mb-3">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-header text-white border-secondary">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="buscadorLocalToners" class="form-control bg-input text-dark border-secondary"
+                        placeholder="Buscar por modelo, código QR, ubicación..."
+                        oninput="filtrarTonersLocalmente()">
+                </div>
+            </div>
+
+            <div id="tablaToners" class="table-responsive">
+                <!-- Se rellena dinámicamente por JS -->
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: HISTORIAL GENERAL ─────────── -->
+        <section id="vistaListaHistorial" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 fw-bold text-white mb-0">
+                    <i class="bi bi-clock-history me-2"></i>Historial de Movimientos
+                </h1>
+            </div>
+
+            <!-- Buscador local e interactivo -->
+            <div class="mb-3">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-header text-white border-secondary">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="buscadorLocalHistorial" class="form-control bg-input text-dark border-secondary"
+                        placeholder="Buscar por descripción, responsable, tipo, acción..."
+                        oninput="filtrarHistorialLocalmente()">
+                </div>
+            </div>
+
+            <div id="tablaHistorialGeneral" class="table-responsive">
+                <!-- Se rellena dinámicamente por JS -->
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: BUSCADOR GLOBAL ─────────── -->
+        <section id="vistaBuscador" class="d-none">
+            <div class="text-center mb-4">
+                <h1 class="h3 fw-bold text-white">
+                    <i class="bi bi-search me-2"></i>Buscador Global
+                </h1>
+                <p class="text-secondary">
+                    Busque máquinas o piezas por nombre, marca, modelo, número de serie o referencia.
+                </p>
+            </div>
+
+            <div class="card bg-card mb-4">
+                <div class="card-body">
+                    <div class="input-group input-group-lg">
+                        <input type="text" id="inputBuscarGlobal"
+                            class="form-control form-control-lg bg-input text-white border-secondary"
+                            placeholder="Término de búsqueda (HP, fusor, serie, etc.)...">
+                        <button class="btn btn-primary btn-lg" onclick="buscarGlobal()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultadosBuscador">
+                <!-- Contenedor para tarjetas de la búsqueda unificada -->
+                <div id="resultadosUnificados" class="row g-3 mb-4 d-none"></div>
+
+                <div id="resultadosMaquinas" class="mb-4 d-none">
+                    <h4 class="text-accent mb-3"><i class="bi bi-printer me-2"></i>Máquinas encontradas</h4>
+                    <div id="tablaResultadosMaquinas" class="table-responsive"></div>
+                </div>
+
+                <div id="resultadosPiezas" class="mb-4 d-none">
+                    <h4 class="text-accent mb-3"><i class="bi bi-gear me-2"></i>Piezas encontradas</h4>
+                    <div id="tablaResultadosPiezas" class="table-responsive"></div>
+                </div>
+
+                <div id="resultadosToners" class="mb-4 d-none">
+                    <h4 class="text-accent mb-3"><i class="bi bi-droplet me-2"></i>Tóneres encontrados</h4>
+                    <div id="tablaResultadosToners" class="table-responsive"></div>
+                </div>
+
+                <div id="sinResultadosBusqueda" class="text-center text-secondary py-5 d-none">
+                    <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
+                    No se encontraron coincidencias.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: REIMPRESIÓN DE ETIQUETAS ─────────── -->
+        <section id="vistaReimpresion" class="d-none">
+            <div class="text-center mb-4">
+                <h1 class="h3 fw-bold text-white">
+                    <i class="bi bi-printer me-2"></i>Reimprimir Etiquetas QR
+                </h1>
+                <p class="text-secondary">
+                    Introduzca el identificador (ej. MQ-1, PZ-5, TNR-3) para reimprimir una etiqueta de máquina, pieza o tóner.
+                </p>
+            </div>
+
+            <div class="card bg-card mb-4">
+                <div class="card-body">
+                    <h5 class="text-white mb-3">Buscar por Código/QR</h5>
+                    <div class="input-group input-group-lg mb-4">
+                        <span class="input-group-text bg-header text-white border-secondary"><i
+                                class="bi bi-upc-scan"></i></span>
+                        <input type="text" id="inputReimpresionId"
+                            class="form-control form-control-lg bg-input text-white border-secondary"
+                            placeholder="Ej: MQ-1, PZ-2 o TNR-3...">
+                        <button class="btn btn-accent btn-lg" onclick="buscarYReimprimirEtiqueta()">
+                            <i class="bi bi-search me-1"></i>Buscar y Generar
+                        </button>
+                    </div>
+
+                    <h5 class="text-white mb-3 border-top border-secondary pt-3">O seleccionar un elemento existente</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary fs-6">Seleccionar Máquina</label>
+                            <select id="selectReimpresionMaquina" class="form-select bg-input text-white border-secondary" onchange="seleccionarMaquinaReimpresion()">
+                                <option value="">-- Seleccione máquina --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary fs-6">Seleccionar Pieza</label>
+                            <select id="selectReimpresionPieza" class="form-select bg-input text-white border-secondary" onchange="seleccionarPiezaReimpresion()">
+                                <option value="">-- Seleccione pieza --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary fs-6">Seleccionar Tóner</label>
+                            <select id="selectReimpresionToner" class="form-select bg-input text-white border-secondary" onchange="seleccionarTonerReimpresion()">
+                                <option value="">-- Seleccione tóner --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─────────── VISTA: INVENTARIO ─────────── -->
+        <section id="vistaInventario" class="d-none">
+            <div class="text-center mb-4">
+                <h1 class="h3 fw-bold text-white">
+                    <i class="bi bi-boxes me-2"></i>Inventario General
+                </h1>
+                <p class="text-secondary">
+                    Seleccione una categoría para consultar el inventario de artículos.
+                </p>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="row g-3 justify-content-center mb-4">
+                <div class="col-md-4">
+                    <button id="btnInvMaquinas" class="btn btn-primary w-100 py-3 fw-bold btn-inv" onclick="consultarInventario('maquinas')">
+                        <i class="bi bi-printer me-2 fs-5"></i>Inventario Máquinas
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button id="btnInvPiezas" class="btn btn-primary w-100 py-3 fw-bold btn-inv" onclick="consultarInventario('piezas')">
+                        <i class="bi bi-gear me-2 fs-5"></i>Inventario Piezas
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button id="btnInvToneres" class="btn btn-primary w-100 py-3 fw-bold btn-inv" onclick="consultarInventario('toneres')">
+                        <i class="bi bi-droplet-fill me-2 fs-5"></i>Inventario Tóneres
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra de Progreso Animada (Carga Simulada) -->
+            <div id="loadingInventario" class="d-none my-5">
+                <div class="text-center mb-3">
+                    <h5 class="text-white fw-bold"><i class="bi bi-arrow-repeat spin me-2 d-inline-block"></i>Cargando datos...</h5>
+                    <span id="contadorSegundos" class="badge bg-secondary fs-6">5s restantes</span>
+                </div>
+                <div class="progress bg-dark" style="height: 25px;">
+                    <div id="barraProgresoInventario" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
+
+            <!-- Contenedor de Resultados -->
+            <div id="resultadosInventario" class="d-none mt-4">
+                <div class="card bg-card mb-4 border-success shadow-sm">
+                    <div class="card-body text-center py-4">
+                        <h4 class="text-white mb-2" id="tituloResultadosInventario">Total de Artículos</h4>
+                        <div class="display-3 fw-bold text-accent mb-0" id="totalArticulosInventario">0</div>
+                        <!-- Desglose de Tóneres -->
+                        <div id="desgloseToneres" class="d-none border-top border-secondary pt-3 mt-3">
+                            <div class="row">
+                                <div class="col-6 border-end border-secondary">
+                                    <span class="d-block text-secondary fs-6 mb-1">En almacén (Sueltos)</span>
+                                    <span class="fs-3 fw-bold text-success" id="toneresAlmacen">0</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="d-block text-secondary fs-6 mb-1">En máquinas (Instalados)</span>
+                                    <span class="fs-3 fw-bold text-info" id="toneresMaquinas">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="table-responsive" id="tablaInventarioContenedor">
+                    <!-- Tabla de resultados -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Profesional -->
+    <footer class="site-footer">
+        <div class="container-fluid">
+            <span><span class="text-negro">Web creada y gestionada por </span><span class="author-verde">Alonso Feria
+                    Arriaza</span><span class="text-negro"> — trazabilidad </span><span class="author-verde">©
+                    2026</span></span>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         TOAST DE NOTIFICACIONES
+         Componente flotante para mostrar mensajes de éxito, error
+         o advertencia al usuario tras cada operación.
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastNotificacion" class="toast align-items-center border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fs-5" id="toastMensaje"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Cerrar"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SCRIPTS
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Modal: Guardar Tóner Manual -->
+    <div class="modal fade" id="modalManualToner" tabindex="-1" aria-labelledby="modalManualTonerLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-card border-secondary text-dark">
+                <div class="modal-header bg-header">
+                    <h5 class="modal-title" id="modalManualTonerLabel">Registrar Nuevo Tóner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formManualToner" onsubmit="guardarTonerManual(event)">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="tonModelo" class="form-label text-dark fw-bold">Modelo de Tóner</label>
+                            <input type="text" class="form-control bg-input text-dark border-secondary" id="tonModelo"
+                                placeholder="Ej: TK-3160, TN-324..." required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tonNivelToner" class="form-label text-dark fw-bold">Nivel del Tóner</label>
+                            <select class="form-select bg-white text-dark border-secondary" id="tonNivelToner" required style="background-color: white !important; color: black !important;">
+                                <option value="" style="background-color: white !important; color: black !important;">Seleccionar...</option>
+                                <option value="25%" style="background-color: white !important; color: black !important;">25%</option>
+                                <option value="50%" style="background-color: white !important; color: black !important;">50%</option>
+                                <option value="75%" style="background-color: white !important; color: black !important;">75%</option>
+                                <option value="100%" selected style="background-color: white !important; color: black !important;">100% (Lleno)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tonUbicacionFisica" class="form-label text-dark fw-bold">Ubicación Física</label>
+                            <input type="text" class="form-control bg-input text-dark border-secondary" id="tonUbicacionFisica"
+                                placeholder="Ej: Estantería B, Cajón 4">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success text-white">Guardar y Generar QR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Error de Preparación y Excepción -->
+    <div class="modal fade" id="modalErrorPreparacion" tabindex="-1" aria-labelledby="modalErrorPreparacionLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-card border-danger text-dark">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="modalErrorPreparacionLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Validación Comercial Fallida</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start">
+                    <p class="text-danger fw-bold mb-2">No se puede enviar esta máquina al catálogo de ventas por los siguientes motivos:</p>
+                    <div class="alert alert-danger" id="textoErrorPreparacion">
+                        Motivo del error aquí.
+                    </div>
+                    
+                    <!-- Sección Oculta para ingresar el motivo de excepción -->
+                    <div id="seccionMotivoExcepcion" class="d-none mt-3">
+                        <label for="inputMotivoExcepcion" class="form-label text-dark fw-bold">Motivo de la Excepción (Obligatorio)</label>
+                        <textarea class="form-control border-secondary" id="inputMotivoExcepcion" rows="3" placeholder="Indique el motivo técnico/comercial para forzar el envío..."></textarea>
+                        <div class="text-danger d-none mt-1" id="errorMotivoExcepcion">El motivo es obligatorio.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-warning text-dark fw-bold" id="btnForzarExcepcion" onclick="mostrarSeccionExcepcion()"><i class="bi bi-shield-fill-exclamation me-1"></i>Forzar Excepción</button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger text-white d-none" id="btnConfirmarExcepcion" onclick="confirmarExcepcion()"><i class="bi bi-check-circle me-1"></i>Confirmar y Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Extraer Pieza -->
+    <div class="modal fade" id="modalExtraerPieza" tabindex="-1" aria-labelledby="modalExtraerPiezaLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-card border-secondary text-dark">
+                <div class="modal-header bg-header">
+                    <h5 class="modal-title" id="modalExtraerPiezaLabel">Extraer Componente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formExtraerPieza" onsubmit="confirmarExtraccionPieza(event)">
+                    <div class="modal-body">
+                        <input type="hidden" id="extTipoPieza">
+                        <input type="hidden" id="extMaquinaSerie">
+
+                        <div class="mb-3">
+                            <label for="extMotivo" class="form-label text-dark fw-bold">Motivo / Destino de
+                                Extracción</label>
+                            <select class="form-select bg-input text-dark border-secondary" id="extMotivo" required
+                                onchange="onCambioMotivoExtraccion()">
+                                <option value="">Seleccionar...</option>
+                                <option value="Para reparación">Para reparación</option>
+                                <option value="Para almacenar">Para almacenar</option>
+                                <option value="Para cliente">Para cliente</option>
+                            </select>
+                        </div>
+
+                        <!-- Selección de nivel de estado si es Para Almacenar -->
+                        <div class="mb-3 d-none" id="divNivelEstadoExtraccion">
+                            <label for="extNivelEstado" class="form-label text-dark fw-bold">Nivel de Estado
+                                (Fungible)</label>
+                            <select class="form-select bg-input text-dark border-secondary" id="extNivelEstado">
+                                <option value="1">Nivel 1 — Buen estado aparente</option>
+                                <option value="2" selected>Nivel 2 — Estado aceptable</option>
+                                <option value="3">Nivel 3 — Estado dudoso</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="extObservaciones" class="form-label text-dark fw-bold"
+                                id="lblExtObservaciones">Observaciones</label>
+                            <textarea class="form-control bg-input text-dark border-secondary" id="extObservaciones"
+                                rows="3" placeholder="Detalles de la extracción..."></textarea>
+                            <div class="text-danger small mt-1 d-none" id="errorObservacionesCliente">
+                                Si el destino es "Para cliente", debe indicar a dónde va en las observaciones.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success text-white">Extraer y Generar QR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Imprimir QR -->
+    <div class="modal fade" id="modalImprimirQr" tabindex="-1" aria-labelledby="modalImprimirQrLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-card border-secondary text-dark">
+                <div class="modal-header bg-header">
+                    <h5 class="modal-title" id="modalImprimirQrLabel">Etiqueta QR Generada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="p-4 bg-white text-dark rounded d-inline-block shadow" id="areaEtiquetaImprimible"
+                        style="width: 280px; font-family: monospace;">
+                        <h6 class="fw-bold m-0 text-truncate" id="printTituloPieza" style="font-size: 14px;">FUSOR</h6>
+                        <div id="printQrCode" class="d-flex justify-content-center my-3">
+                            <img id="printQrCodeImg" src="" alt="Código QR" style="width: 128px; height: 128px; display: block; border: none;">
+                        </div>
+                        <p class="m-0 fw-bold" id="printQrText" style="font-size: 12px;">PZ-000001</p>
+                        <p class="m-0 text-muted" id="printOrigenText" style="font-size: 10px; word-break: break-all;">
+                            Origen: S/N 12345</p>
+                        <p class="m-0 text-muted" id="printEstadoText" style="font-size: 10px;">Para almacén (Nivel 2)
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary text-white" onclick="ejecutarImpresionQr()"><i
+                            class="bi bi-printer me-2"></i>Imprimir Etiqueta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Identificación del Técnico -->
+    <div class="modal fade" id="modalIdentificacionTecnico" tabindex="-1"
+        aria-labelledby="modalIdentificacionTecnicoLabel" aria-hidden="true" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-card border-secondary text-dark">
+                <div class="modal-header bg-header">
+                    <h5 class="modal-title" id="modalIdentificacionTecnicoLabel">
+                        <i class="bi bi-person-badge me-2"></i>Identificación del Técnico
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p class="text-secondary">Para registrar las acciones que realice, introduzca su nombre o
+                        identificador. Se guardará en este dispositivo para no tener que repetirlo.</p>
+                    <div class="mb-3">
+                        <label for="inputNombreTecnico" class="form-label fw-bold">Nombre o ID del Técnico</label>
+                        <input type="text" class="form-control form-control-lg bg-input text-dark border-secondary"
+                            id="inputNombreTecnico" placeholder="Ej: Juan García, TEC-01..." maxlength="50">
+                        <div class="text-danger small mt-1 d-none" id="errorNombreTecnico">Debe introducir su nombre o
+                            identificador.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-success px-4" onclick="confirmarIdentificacionTecnico()">
+                        <i class="bi bi-check-lg me-1"></i>Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle (incluye Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- HTML5-QRCode: librería para lectura de códigos QR desde cámara -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <!-- QRCode.js: generación de QR en el navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Lógica principal de la aplicación -->
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,565 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ESTILOS PERSONALIZADOS — Sistema de Trazabilidad QR trazabilidad
+   
+   Estos estilos complementan Bootstrap 5.3 para crear una interfaz
+   oscura, táctil y legible diseñada para el uso con móvil en el
+   taller. Los botones y campos son deliberadamente grandes para
+   facilitar la interacción con guantes de trabajo o dedos gruesos.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────── Variables de color del proyecto ─────────── */
+:root {
+    --trazabilidad-primary: #20bf55;        /* Verde brillante y vibrante */
+    --trazabilidad-dark: #f3f5f8;           /* Fondo gris claro oficial de trazabilidad.es */
+    --trazabilidad-card: #ffffff;           /* Tarjetas en blanco puro */
+    --trazabilidad-header: #e8f5eb;         /* Verde suave para cabeceras */
+    --trazabilidad-input: #ffffff;          /* Fondo de inputs en blanco */
+    --trazabilidad-border: #e5e7eb;         /* Bordes en gris claro oficial */
+    --trazabilidad-text: #2e2e2e;           /* Texto oscuro corporativo */
+    --trazabilidad-accent: #20bf55;         /* Verde brillante acento */
+}
+
+/* ─────────── Base del documento ─────────── */
+body {
+    background-color: var(--trazabilidad-dark);
+    color: var(--trazabilidad-text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+
+/* ─────────── Barra de navegación ─────────── */
+.bg-trazabilidad {
+    background: linear-gradient(135deg, #169b40 0%, #20bf55 100%) !important;
+    border-bottom: 3px solid #86efac;
+}
+
+/* ─────────── Contenedor principal ─────────── */
+.contenedor-principal {
+    padding-top: 90px;
+    padding-bottom: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+@media (min-width: 992px) {
+    .contenedor-principal {
+        padding-top: 100px;
+    }
+}
+
+/* Estilo para botones del Navbar superior grandes */
+.navbar-buttons .btn {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    margin: 2px !important;
+    transition: all 0.2s ease-in-out;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-buttons .btn {
+        width: 100%;
+        text-align: center;
+        margin: 4px 0 !important;
+        font-size: 1.15rem !important;
+        padding: 12px 20px !important;
+    }
+    #badgeTecnico {
+        width: 100%;
+        text-align: center;
+        margin: 4px 0 !important;
+        font-size: 1.15rem !important;
+        padding: 12px 20px !important;
+    }
+}
+
+.navbar-buttons .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+}
+
+.navbar-brand {
+    font-size: 1.5rem !important;
+}
+
+/* Reglas de impresión directa de etiquetas QR */
+@media print {
+    /* Ocultar todo el sitio web por defecto */
+    body * {
+        visibility: hidden !important;
+    }
+    
+    /* Mostrar exclusivamente el contenedor temporal de impresión */
+    #contenedorImpresionTemporal, #contenedorImpresionTemporal * {
+        visibility: visible !important;
+    }
+    
+    /* Ocultar el canvas clonado (que se vacía al duplicar innerHTML/clonar) y mostrar la imagen estática del QR */
+    #contenedorImpresionTemporal canvas {
+        display: none !important;
+    }
+    #contenedorImpresionTemporal img {
+        visibility: visible !important;
+        display: block !important;
+        margin: 10px auto !important;
+    }
+    
+    #contenedorImpresionTemporal.etiqueta-grande img {
+        width: 250px !important;
+        height: 250px !important;
+    }
+    #contenedorImpresionTemporal.etiqueta-pequena img {
+        width: 100px !important;
+        height: 100px !important;
+    }
+ 
+    #contenedorImpresionTemporal {
+        position: fixed !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        border: 1px dashed #666666 !important; /* Borde punteado para facilitar el recorte en impresoras de red A4 */
+        box-shadow: none !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        padding: 20px !important;
+        margin: 0 !important;
+        text-align: center !important;
+        font-family: monospace !important;
+        display: block !important;
+        -webkit-print-color-adjust: exact !important; /* Forzar el color y fondos exactos al imprimir */
+        print-color-adjust: exact !important;
+    }
+
+    #contenedorImpresionTemporal.etiqueta-grande {
+        width: 320px !important;
+    }
+
+    #contenedorImpresionTemporal.etiqueta-pequena {
+        width: 180px !important;
+    }
+}
+
+/* ─────────── Tarjetas de formulario ─────────── */
+.bg-card {
+    background-color: var(--trazabilidad-card) !important;
+    border: 1px solid var(--trazabilidad-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+.bg-header {
+    background-color: var(--trazabilidad-header) !important;
+    color: var(--trazabilidad-accent) !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-bottom: 2px solid var(--trazabilidad-border) !important;
+}
+
+/* ─────────── Campos de entrada ─────────── */
+.bg-input {
+    background-color: var(--trazabilidad-input) !important;
+    color: #212529 !important;
+    border: 2px solid var(--trazabilidad-border) !important;
+    border-radius: 8px !important;
+    transition: all 0.25s ease-in-out;
+}
+
+.bg-input::placeholder {
+    color: #7f8c8d !important;
+}
+
+.bg-input:focus {
+    background-color: #ffffff !important;
+    border-color: var(--trazabilidad-accent) !important;
+    box-shadow: 0 0 10px rgba(46, 125, 50, 0.3) !important;
+    color: #212529 !important;
+}
+
+/* Select options en modo claro con alto contraste */
+.bg-input option {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+    padding: 10px !important;
+}
+
+/* Estilo para los select en general */
+select.bg-input {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300d4ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
+    background-repeat: no-repeat !important;
+    padding-right: 2.5rem !important;
+}
+
+/* ─────────── Botones extra-grandes (táctiles) ─────────── */
+.btn-xl {
+    padding: 16px 24px !important;
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    min-height: 60px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ─────────── Botones del menú lateral ─────────── */
+.btn-menu {
+    padding: 18px 20px !important;
+    font-size: 1.15rem !important;
+    text-align: left !important;
+    border-radius: 10px !important;
+    transition: all 0.2s ease;
+}
+
+.btn-menu:active {
+    transform: scale(0.97);
+}
+
+/* ─────────── Contenedor del lector QR ─────────── */
+#lectorQr {
+    max-width: 400px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 3px solid var(--trazabilidad-accent);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
+}
+
+/* ─────────── Selector de niveles de estado ─────────── */
+.bg-nivel {
+    background-color: var(--trazabilidad-input);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bg-nivel:hover {
+    background-color: #333649;
+}
+
+.bg-nivel .form-check-input:checked + .form-check-label {
+    font-weight: 600;
+}
+
+/* ─────────── Tablas de listado ─────────── */
+.table-dark-trazabilidad {
+    --bs-table-bg: var(--trazabilidad-card);
+    --bs-table-border-color: var(--trazabilidad-border);
+    --bs-table-hover-bg: var(--trazabilidad-header);
+    --bs-table-striped-bg: #1e2130;
+    color: var(--trazabilidad-text);
+}
+
+.table-dark-trazabilidad thead {
+    background-color: var(--trazabilidad-header);
+    border-bottom: 2px solid var(--trazabilidad-accent);
+}
+
+.table-dark-trazabilidad tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.table-dark-trazabilidad tbody tr:active {
+    background-color: #2a3050 !important;
+}
+
+/* ─────────── Ficha de detalle ─────────── */
+.ficha-campo {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--trazabilidad-border);
+}
+
+.ficha-campo:last-child {
+    border-bottom: none;
+}
+
+.ficha-label {
+    color: var(--trazabilidad-accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.ficha-valor {
+    color: var(--trazabilidad-text);
+    font-size: 1.1rem;
+}
+
+.ficha-valor.vacio {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* ─────────── Badges de nivel ─────────── */
+.badge-nivel-1 {
+    background-color: #198754 !important;
+    font-size: 0.95rem;
+    padding: 8px 14px;
+}
+
+.badge-nivel-2 {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+    font-size: 0.95rem;
+    padding: 8px 14px;
+}
+
+.badge-nivel-3 {
+    background-color: #dc3545 !important;
+    font-size: 0.95rem;
+    padding: 8px 14px;
+}
+
+/* ─────────── Alertas de evaluación de movimiento ─────────── */
+.alerta-autorizado {
+    background-color: #e8f5e9;
+    border: 2px solid #2e7d32;
+    color: #1b5e20;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.alerta-advertencia {
+    background-color: #fffde7;
+    border: 2px solid #fbc02d;
+    color: #f57f17;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.alerta-bloqueado {
+    background-color: #ffebee;
+    border: 2px solid #c62828;
+    color: #b71c1c;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+/* ─────────── Footer Profesional ─────────── */
+.site-footer {
+    background-color: transparent !important;
+    border-top: none !important;
+    padding: 10px 0 !important;
+    text-align: center;
+    font-size: 0.78rem !important;
+    margin-top: 40px !important;
+    box-shadow: none !important;
+    opacity: 0.65;
+}
+
+.site-footer .text-negro {
+    color: #000000 !important;
+    font-weight: 500 !important;
+}
+
+.site-footer .author-verde {
+    color: var(--trazabilidad-accent) !important;
+    font-weight: 700 !important;
+}
+
+/* ─────────── Toast personalizado ─────────── */
+.toast {
+    border-radius: 12px !important;
+}
+
+/* ─────────── Animaciones suaves ─────────── */
+section {
+    animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────── Responsive: ajustes para pantallas muy pequeñas ─────────── */
+@media (max-width: 400px) {
+    .btn-xl {
+        padding: 14px 16px !important;
+        font-size: 1.05rem !important;
+    }
+
+    .contenedor-principal {
+        padding-top: 70px;
+    }
+
+    .ficha-valor {
+        font-size: 1rem;
+    }
+}
+
+/* ─────────── Estilos de la Vista de Inicio y Elementos Premium ─────────── */
+.text-accent {
+    color: var(--trazabilidad-accent) !important;
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--trazabilidad-accent) 0%, #10b981 100%) !important;
+    border-color: var(--trazabilidad-accent) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(32, 191, 85, 0.2);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.btn-accent:hover, .btn-accent:focus {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(32, 191, 85, 0.4);
+}
+
+.btn-accent:active {
+    transform: translateY(1px);
+}
+
+/* Animaciones Premium */
+.animate-pulse {
+    animation: pulse 2.5s infinite alternate;
+    display: inline-block;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(32, 191, 85, 0.2);
+    }
+    100% {
+        transform: scale(1.05);
+        text-shadow: 0 0 30px rgba(32, 191, 85, 0.6);
+        color: #20bf55 !important;
+    }
+}
+
+.btn-primary.btn-xl {
+    background: linear-gradient(135deg, var(--trazabilidad-primary) 0%, #15803d 100%) !important;
+    border: none;
+    box-shadow: 0 4px 15px rgba(32, 191, 85, 0.2);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.btn-primary.btn-xl:hover, .btn-primary.btn-xl:focus {
+    background: linear-gradient(135deg, #16a34a 0%, #166534 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(32, 191, 85, 0.4);
+}
+
+.btn-primary.btn-xl:active {
+    transform: translateY(1px);
+}
+
+/* ─────────── MEJORAS DE VISIBILIDAD Y LEGIBILIDAD EN EL TALLER ─────────── */
+
+/* Desactivar negrita excesiva para el contenido de texto en general y celdas */
+#resultadosBuscador table,
+.table-dark-trazabilidad,
+.list-group-item {
+    font-size: 1.15rem !important; /* Letra un poco más grande */
+}
+
+/* Encabezados de tabla definidos */
+#resultadosBuscador th,
+.table-dark-trazabilidad th {
+    font-weight: 700 !important;
+    color: #ffffff !important; /* Texto de cabecera en blanco sobre verde */
+    padding: 14px !important;
+    background-color: var(--trazabilidad-accent) !important; /* Fondo verde brillante */
+}
+
+/* Celdas con texto limpio y negro de alto contraste sobre fondo blanco */
+#resultadosBuscador td,
+.table-dark-trazabilidad td {
+    font-weight: 500 !important; /* Peso regular/medio para lectura rápida */
+    color: #2e2e2e !important;   /* Letra oscura para máxima legibilidad */
+    padding: 14px !important;
+}
+
+/* Filas con hover claro y contrastado al pasar el cursor */
+#resultadosBuscador tbody tr:hover,
+.table-dark-trazabilidad tbody tr:hover {
+    background-color: #f1f8f5 !important; /* Fondo verde sutil de hover */
+}
+
+/* Historial de movimientos con letras oscuras sobre fondo de tarjeta blanco */
+.list-group-item p {
+    font-weight: 500 !important;
+    color: #2e2e2e !important;
+    font-size: 1.1rem !important;
+}
+
+.list-group-item small {
+    font-size: 0.95rem !important;
+    color: var(--trazabilidad-accent) !important;
+}
+
+/* Aumento de tamaño y contraste de etiquetas de formulario */
+.form-label {
+    font-size: 1.15rem !important;
+    font-weight: 600 !important;
+    color: var(--trazabilidad-text) !important;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Modificar tamaño y color de textos en formularios para alta visibilidad */
+.form-control, .form-select {
+    font-size: 1.15rem !important;
+    font-weight: 500 !important;
+    color: var(--trazabilidad-text) !important;
+    background-color: #ffffff !important;
+    border: 1px solid #ced4da !important;
+}
+
+/* Evitar que clases text-white o text-light de Bootstrap dejen ilegibles los textos en fondo claro */
+main h1, main h2, main h3, main h4, main h5, main h6,
+section h1, section h2, section h3, section h4, section h5, section h6,
+main .text-white, main .text-light, main .text-white-50,
+.form-label, label, .form-check-label, .text-light, .text-white-50 {
+    color: var(--trazabilidad-text) !important;
+}
+
+/* Forzar que el texto escrito en los inputs sea visible */
+input, select, textarea {
+    color: var(--trazabilidad-text) !important;
+}
+
+/* ─────────── Estilos del Módulo de Inventario ─────────── */
+.spin {
+    animation: trazabilidad-spin 2s infinite linear;
+}
+@keyframes trazabilidad-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(359deg);
+    }
+}
+.btn-inv {
+    background: linear-gradient(135deg, var(--trazabilidad-primary) 0%, #15803d 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(32, 191, 85, 0.2) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+.btn-inv:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(32, 191, 85, 0.4) !important;
+}
+.btn-inv:active {
+    transform: translateY(1px) !important;
+}
+
+

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Catálogo Comercial - Taller trazabilidad">
+    <title>trazabilidad - Catálogo Comercial</title>
+    <script>
+        (function() {
+            const sessionStr = localStorage.getItem('trazabilidad_session');
+            if (!sessionStr) {
+                window.location.href = '/login.html';
+                return;
+            }
+            try {
+                const session = JSON.parse(sessionStr);
+                if (session.role !== 'COMERCIAL' && session.role !== 'SUPERVISOR_COMERCIAL') {
+                    window.location.href = '/index.html';
+                }
+            } catch (e) {
+                localStorage.removeItem('trazabilidad_session');
+                window.location.href = '/login.html';
+            }
+        })();
+    </script>
+    <!-- Bootstrap 5.3 via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        .catalogo-container {
+            padding-top: 130px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        .maquina-card {
+            transition: all 0.3s ease;
+            background-color: #ffffff !important;
+            border: 1px solid var(--trazabilidad-border) !important;
+        }
+        .maquina-card.disponible:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(46, 125, 50, 0.2);
+            cursor: pointer;
+        }
+        .maquina-card.reservada {
+            background-color: #fff8e1 !important;
+            border: 1px solid #f9a825 !important;
+        }
+        .visual-optimo { border-left: 5px solid #198754; }
+        .visual-aceptable { border-left: 5px solid #ffc107; }
+        .visual-deficiente { border-left: 5px solid #dc3545; }
+        .maquina-card .card-title { color: #212529 !important; }
+        .maquina-card p { color: #4a5568 !important; }
+
+        /* Formulario de reserva inline */
+        .reserva-form {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 10px 14px;
+            display: none;
+        }
+        .reserva-form.activo { display: block; }
+
+        /* Badge de reserva */
+        .badge-reservada {
+            background: linear-gradient(135deg, #f9a825, #fb8c00);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Sección supervisor */
+        .supervisor-banner {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: #fff;
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Tabs supervisor */
+        .nav-tabs-supervisor .nav-link {
+            color: #555;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+        }
+        .nav-tabs-supervisor .nav-link.active {
+            color: #198754;
+            border-bottom-color: #fff;
+        }
+
+        /* Spinner de carga de reserva */
+        .btn-reservar-spinner { display: none; }
+        .btn-reservar.loading .btn-reservar-spinner { display: inline-block; }
+        .btn-reservar.loading .btn-reservar-text { display: none; }
+
+        /* Card info reserva */
+        .reserva-info-box {
+            background: #fff8e1;
+            border: 1px solid #f9a825;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+        }
+
+        .btn-revocar {
+            background: linear-gradient(135deg, #b71c1c, #c62828);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-revocar:hover {
+            background: linear-gradient(135deg, #c62828, #d32f2f);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(183, 28, 28, 0.35);
+            color: #fff;
+        }
+
+        /* Notificación toast */
+        .toast-comercial {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            min-width: 280px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="navbar navbar-dark bg-trazabilidad fixed-top shadow">
+        <div class="container-fluid">
+            <span class="navbar-brand fw-bold text-white" id="navBrand">
+                <i class="bi bi-shop me-2"></i>trazabilidad Catálogo Comercial
+            </span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white small d-none d-sm-inline">
+                    <span id="rolBadgeNav"></span>
+                    <span id="nombreComercialNav">Comercial</span>
+                </span>
+                <a href="#" onclick="cerrarSesion(event)" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Salir</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="container-fluid catalogo-container pb-5 px-4">
+
+        <!-- Banner solo para supervisor -->
+        <div id="supervisorBanner" class="supervisor-banner d-none">
+            <i class="bi bi-shield-check fs-2"></i>
+            <div>
+                <div class="fw-bold fs-5">Panel de Supervisor Comercial</div>
+                <div class="small opacity-75">Tiene acceso completo: puede ver todas las máquinas y revocar reservas.</div>
+            </div>
+        </div>
+
+        <!-- Encabezado con buscador -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <h2 class="fw-bold text-dark" id="tituloCatalogo">Equipos Listos para Venta</h2>
+                <p class="text-secondary m-0">Catálogo de máquinas revisadas y preparadas comercialmente.</p>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-header text-accent border-secondary"><i class="bi bi-search"></i></span>
+                    <input type="text" id="filtroComercial" class="form-control bg-input text-dark border-secondary form-control-lg" placeholder="Filtrar por marca, modelo o serie..." oninput="filtrarCatalogo()">
+                </div>
+            </div>
+        </div>
+
+        <!-- TABS (solo para supervisor) -->
+        <ul class="nav nav-tabs nav-tabs-supervisor mb-4 d-none" id="supervisorTabs">
+            <li class="nav-item">
+                <button class="nav-link active" id="tabDisponibles" onclick="mostrarTab('disponibles')">
+                    <i class="bi bi-check-circle me-1"></i>Disponibles <span class="badge bg-success ms-1" id="badgeDisponibles">0</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="tabReservadas" onclick="mostrarTab('reservadas')">
+                    <i class="bi bi-bookmark-fill me-1"></i>Reservadas/Vendidas <span class="badge bg-warning text-dark ms-1" id="badgeReservadas">0</span>
+                </button>
+            </li>
+        </ul>
+
+        <div id="loaderCatalogo" class="text-center py-5">
+            <div class="spinner-border text-success mb-3" role="status"></div>
+            <p class="text-secondary">Cargando catálogo...</p>
+        </div>
+
+        <!-- SECCIÓN DISPONIBLES (se oculta cuando el supervisor abre la pestaña Reservadas) -->
+        <div id="seccionDisponibles">
+            <div id="sinEquipos" class="text-center py-5 d-none">
+                <i class="bi bi-emoji-frown display-3 text-secondary mb-3"></i>
+                <h4 class="text-dark">No hay equipos disponibles</h4>
+                <p class="text-secondary">Actualmente no hay máquinas preparadas por el equipo técnico.</p>
+            </div>
+
+            <!-- GRILLA DISPONIBLES -->
+            <div class="row g-4" id="grillaCatalogo">
+                <!-- Rellenado dinámicamente -->
+            </div>
+        </div>
+
+        <!-- GRILLA RESERVADAS (solo supervisor) -->
+        <div id="seccionReservadas" class="d-none">
+            <div class="row g-4" id="grillaReservadas">
+                <!-- Rellenado dinámicamente -->
+            </div>
+            <div id="sinReservadas" class="text-center py-5 d-none">
+                <i class="bi bi-bookmark display-3 text-secondary mb-3"></i>
+                <h4 class="text-dark">No hay máquinas reservadas</h4>
+                <p class="text-secondary">Ningún comercial ha reservado máquinas aún.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL DETALLE DE EQUIPO -->
+    <div class="modal fade" id="modalDetalleComercial" tabindex="-1" aria-labelledby="modalDetalleComercialLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-card border-secondary text-dark">
+                <div class="modal-header bg-header text-accent">
+                    <h5 class="modal-title font-weight-bold" id="modalDetalleComercialLabel">Detalles del Equipo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" id="cuerpoDetalleComercial">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RESERVA -->
+    <div class="modal fade" id="modalReserva" tabindex="-1" aria-labelledby="modalReservaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning">
+                <div class="modal-header" style="background: linear-gradient(135deg, #e65100, #f57c00); color: #fff;">
+                    <h5 class="modal-title fw-bold" id="modalReservaLabel">
+                        <i class="bi bi-bookmark-plus me-2"></i>Reservar / Vender Máquina
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-secondary small mb-3">Introduzca el nombre del cliente o una observación sobre la reserva:</p>
+                    <div class="mb-3">
+                        <label for="inputObservacionReserva" class="form-label fw-bold">Cliente / Observación <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="inputObservacionReserva" rows="3" maxlength="500"
+                            placeholder="Ej: Sr. García - Empresa Logística SA, presupuesto aprobado..."></textarea>
+                        <div class="form-text text-end"><span id="charCount">0</span>/500</div>
+                    </div>
+                    <div id="alertaReservaError" class="alert alert-danger py-2 d-none">
+                        <i class="bi bi-exclamation-triangle me-2"></i>El campo es obligatorio.
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning text-white fw-bold" id="btnConfirmarReserva" onclick="confirmarReserva()">
+                        <i class="bi bi-bookmark-check me-2"></i>Confirmar Reserva
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICACIÓN -->
+    <div class="toast-comercial">
+        <div id="toastComercial" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="toastBody">Operación completada.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Profesional -->
+    <footer class="site-footer">
+        <div class="container-fluid text-center">
+            <span><span class="text-negro">Web creada y gestionada por </span><span class="author-verde">Alonso Feria Arriaza</span><span class="text-negro"> — trazabilidad </span><span class="author-verde">© 2026</span></span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let catalogoCompleto = [];
+        let reservadasCompleto = [];
+        let maquinaParaReservar = null;
+        let tabActivo = 'disponibles';
+
+        // ─── Sesión ───────────────────────────────────────────
+        let session = {};
+        try {
+            session = JSON.parse(localStorage.getItem('trazabilidad_session') || '{}');
+        } catch(e) {}
+        const esSupervisor = session.role === 'SUPERVISOR_COMERCIAL';
+        const nombreUsuario = session.username || 'Comercial';
+
+        // ─── Init ─────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            // Nombre en nav
+            document.getElementById('nombreComercialNav').textContent = nombreUsuario;
+            if (esSupervisor) {
+                document.getElementById('rolBadgeNav').innerHTML = '<span class="badge bg-primary me-1">Supervisor</span>';
+                document.getElementById('supervisorBanner').classList.remove('d-none');
+                document.getElementById('supervisorTabs').classList.remove('d-none');
+                document.getElementById('tituloCatalogo').textContent = 'Panel Comercial — Supervisor';
+                document.getElementById('navBrand').innerHTML = '<i class="bi bi-shield-check me-2"></i>trazabilidad · Supervisor Comercial';
+            }
+
+            // Contador de caracteres del textarea
+            const textarea = document.getElementById('inputObservacionReserva');
+            textarea.addEventListener('input', () => {
+                document.getElementById('charCount').textContent = textarea.value.length;
+            });
+
+            cargarCatalogo();
+        });
+
+        // ─── Carga de datos ───────────────────────────────────
+        function cargarCatalogo() {
+            document.getElementById('loaderCatalogo').classList.remove('d-none');
+            document.getElementById('grillaCatalogo').innerHTML = '';
+            document.getElementById('sinEquipos').classList.add('d-none');
+
+            // Para supervisor: carga todos (disponibles + reservadas)
+            // Para comercial: carga solo disponibles
+            const endpoint = esSupervisor
+                ? API_BASE + '/maquinas/comercial'
+                : API_BASE + '/maquinas/comercial/disponibles';
+
+            fetch(endpoint)
+                .then(res => res.json())
+                .then(maquinas => {
+                    document.getElementById('loaderCatalogo').classList.add('d-none');
+                    if (esSupervisor) {
+                        // Separar disponibles y reservadas
+                        catalogoCompleto = maquinas.filter(m => !m.estadoVenta);
+                        reservadasCompleto = maquinas.filter(m => m.estadoVenta === 'RESERVADA');
+                        document.getElementById('badgeDisponibles').textContent = catalogoCompleto.length;
+                        document.getElementById('badgeReservadas').textContent = reservadasCompleto.length;
+                        renderDisponibles(catalogoCompleto);
+                        renderReservadas(reservadasCompleto);
+                    } else {
+                        catalogoCompleto = maquinas;
+                        renderDisponibles(maquinas);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('loaderCatalogo').classList.add('d-none');
+                    mostrarToast('Error al conectar con la base de datos comercial.', 'danger');
+                });
+        }
+
+        // ─── Tabs supervisor ──────────────────────────────────
+        function mostrarTab(tab) {
+            tabActivo = tab;
+            const secDisponibles = document.getElementById('seccionDisponibles');
+            const secReservadas = document.getElementById('seccionReservadas');
+            const tabDisp = document.getElementById('tabDisponibles');
+            const tabRes = document.getElementById('tabReservadas');
+
+            if (tab === 'disponibles') {
+                secDisponibles.classList.remove('d-none');
+                secReservadas.classList.add('d-none');
+                tabDisp.classList.add('active');
+                tabRes.classList.remove('active');
+            } else {
+                secDisponibles.classList.add('d-none');
+                secReservadas.classList.remove('d-none');
+                tabDisp.classList.remove('active');
+                tabRes.classList.add('active');
+            }
+        }
+
+
+        // ─── Render disponibles ───────────────────────────────
+        function renderDisponibles(maquinas) {
+            const grilla = document.getElementById('grillaCatalogo');
+            const divSin = document.getElementById('sinEquipos');
+            grilla.innerHTML = '';
+
+            if (maquinas.length === 0) {
+                divSin.classList.remove('d-none');
+                return;
+            }
+            divSin.classList.add('d-none');
+
+            maquinas.forEach(m => {
+                const borderClase = m.estadoVisual === 'Óptimo' ? 'visual-optimo'
+                    : m.estadoVisual === 'Deficiente' ? 'visual-deficiente' : 'visual-aceptable';
+
+                const excHtml = m.comentarioExcepcion ? `
+                    <div class="alert alert-warning py-1 px-2 mt-2 small text-dark" style="font-size:0.82rem;">
+                        <i class="bi bi-shield-fill-exclamation me-1 text-warning"></i><strong>Excepción:</strong> ${m.comentarioExcepcion}
+                    </div>` : '';
+
+                const btnReservar = !esSupervisor ? `
+                    <div class="px-3 pb-3">
+                        <button class="btn btn-warning w-100 fw-bold btn-sm" onclick="abrirModalReserva(${m.id}, event)">
+                            <i class="bi bi-bookmark-plus me-1"></i>Reservar / Vender
+                        </button>
+                    </div>` : '';
+
+                const html = `
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card bg-card maquina-card disponible h-100 ${borderClase}" onclick="verDetalle(${m.id})">
+                        <div class="card-header bg-header d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">${m.marca} ${m.modelo}</span>
+                            ${renderBadgeVisual(m.estadoVisual)}
+                        </div>
+                        <div class="card-body pb-2">
+                            <p class="m-0 small text-secondary">Nº Serie: <strong class="text-dark">${m.numeroSerie}</strong></p>
+                            <p class="m-0 small text-secondary">Copias: <strong class="text-dark">${m.numeroCopias || 'Sin datos'}</strong></p>
+                            <p class="m-0 small text-secondary">Ubicación: <strong class="text-dark">${m.ubicacionFisica || 'Sin datos'}</strong></p>
+                            <p class="m-0 small text-secondary">Preparado por: <strong class="text-dark">${m.tecnicoPreparadoComercial || 'Sin asignar'}</strong></p>
+                            <p class="mt-2 text-truncate text-muted small mb-0">${m.observaciones || 'Sin observaciones.'}</p>
+                            ${excHtml}
+                        </div>
+                        ${btnReservar}
+                    </div>
+                </div>`;
+                grilla.innerHTML += html;
+            });
+        }
+
+        // ─── Render reservadas (solo supervisor) ──────────────
+        function renderReservadas(maquinas) {
+            const grilla = document.getElementById('grillaReservadas');
+            const divSin = document.getElementById('sinReservadas');
+            if (!grilla) return;
+            grilla.innerHTML = '';
+
+            if (maquinas.length === 0) {
+                divSin.classList.remove('d-none');
+                return;
+            }
+            divSin.classList.add('d-none');
+
+            maquinas.forEach(m => {
+                const borderClase = m.estadoVisual === 'Óptimo' ? 'visual-optimo'
+                    : m.estadoVisual === 'Deficiente' ? 'visual-deficiente' : 'visual-aceptable';
+
+                const html = `
+                <div class="col-12 col-md-6 col-lg-4" id="card-reservada-${m.id}">
+                    <div class="card maquina-card reservada h-100 ${borderClase}" onclick="verDetalle(${m.id})" style="cursor:pointer;">
+                        <div class="card-header d-flex justify-content-between align-items-center" style="background:#fff3e0;">
+                            <span class="fw-bold">${m.marca} ${m.modelo}</span>
+                            <span class="badge-reservada"><i class="bi bi-bookmark-fill me-1"></i>RESERVADA</span>
+                        </div>
+                        <div class="card-body pb-2">
+                            <p class="m-0 small text-secondary">Nº Serie: <strong class="text-dark">${m.numeroSerie}</strong></p>
+                            <p class="m-0 small text-secondary">Copias: <strong class="text-dark">${m.numeroCopias || 'Sin datos'}</strong></p>
+                            <div class="reserva-info-box mt-2 mb-2">
+                                <div class="fw-bold text-warning-emphasis mb-1"><i class="bi bi-person-fill me-1"></i>Reservado por: ${esc(m.comercialReserva)}</div>
+                                <div class="text-dark"><i class="bi bi-chat-left-text me-1"></i>${esc(m.observacionVenta)}</div>
+                            </div>
+                        </div>
+                        <div class="px-3 pb-3">
+                            <button class="btn btn-revocar w-100 btn-sm" onclick="event.stopPropagation(); revocarReserva(${m.id})">
+                                <i class="bi bi-x-circle me-1"></i>Revocar Reserva
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+                grilla.innerHTML += html;
+            });
+        }
+
+
+        // ─── Filtro búsqueda ──────────────────────────────────
+        function filtrarCatalogo() {
+            const term = document.getElementById('filtroComercial').value.toLowerCase().trim();
+            if (tabActivo === 'reservadas') {
+                const filtradas = reservadasCompleto.filter(m =>
+                    (m.marca && m.marca.toLowerCase().includes(term)) ||
+                    (m.modelo && m.modelo.toLowerCase().includes(term)) ||
+                    (m.numeroSerie && m.numeroSerie.toLowerCase().includes(term)) ||
+                    (m.comercialReserva && m.comercialReserva.toLowerCase().includes(term)) ||
+                    (m.observacionVenta && m.observacionVenta.toLowerCase().includes(term))
+                );
+                renderReservadas(filtradas);
+            } else {
+                const filtradas = catalogoCompleto.filter(m =>
+                    (m.marca && m.marca.toLowerCase().includes(term)) ||
+                    (m.modelo && m.modelo.toLowerCase().includes(term)) ||
+                    (m.numeroSerie && m.numeroSerie.toLowerCase().includes(term))
+                );
+                renderDisponibles(filtradas);
+            }
+        }
+
+        // ─── Ver detalle (modal info) ─────────────────────────
+        function verDetalle(id) {
+            // Busca en disponibles Y en reservadas (fix: antes solo buscaba en disponibles)
+            const maquina = catalogoCompleto.find(m => m.id === id)
+                         || reservadasCompleto.find(m => m.id === id);
+            if (!maquina) {
+                mostrarToast('No se pudo cargar el detalle de esta máquina.', 'warning');
+                return;
+            }
+
+            document.getElementById('modalDetalleComercialLabel').textContent = `${maquina.marca} ${maquina.modelo}`;
+
+            const renderCampo = (label, valor) => {
+                const v = (valor !== null && valor !== undefined && valor !== '')
+                    ? String(valor)
+                    : '<span class="text-secondary small">Sin datos</span>';
+                return `<div class="mb-2 p-2 border-bottom">
+                    <span class="text-muted fw-bold small d-block" style="text-transform:uppercase;letter-spacing:.5px;font-size:.8rem;">${label}</span>
+                    <span class="text-dark fs-6">${v}</span>
+                </div>`;
+            };
+
+            // Bloque de excepción técnica
+            const excepcionSeccion = maquina.comentarioExcepcion ? `
+                <div class="alert alert-warning border-warning text-dark p-3 mt-3 d-flex align-items-center">
+                    <i class="bi bi-shield-fill-exclamation fs-3 me-3 text-warning"></i>
+                    <div>
+                        <strong class="d-block text-uppercase small text-muted">Excepción Autorizada por Técnico</strong>
+                        <span>${esc(maquina.comentarioExcepcion)}</span>
+                    </div>
+                </div>` : '';
+
+            // Bloque destacado de reserva (solo si la máquina está RESERVADA)
+            const reservaSeccion = maquina.estadoVenta === 'RESERVADA' ? `
+                <div class="mt-3 p-3 rounded-3 border border-2 border-warning" style="background: linear-gradient(135deg, #fff8e1, #fff3cd);">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-bookmark-fill text-warning fs-4 me-2"></i>
+                        <strong class="text-uppercase" style="color:#e65100; letter-spacing:.5px; font-size:.85rem;">Máquina Reservada / Vendida</strong>
+                    </div>
+                    <div class="mb-1">
+                        <span class="text-muted small fw-bold d-block" style="text-transform:uppercase;font-size:.75rem;">Reservado por (Comercial)</span>
+                        <span class="text-dark fw-semibold">${esc(maquina.comercialReserva)}</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-bold d-block mt-1" style="text-transform:uppercase;font-size:.75rem;">Cliente / Observación</span>
+                        <span class="text-dark" style="white-space: pre-wrap;">${esc(maquina.observacionVenta)}</span>
+                    </div>
+                </div>` : '';
+
+            const html = `
+            <div class="p-3 bg-white text-dark rounded">
+                ${reservaSeccion}
+                <div class="mb-4 mt-2">
+                    <h6 class="text-success border-bottom pb-2 fw-bold"><i class="bi bi-upc-scan me-2"></i>1. Identificación</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">${renderCampo('Código QR', maquina.codigoQr || ('MQ-' + maquina.id))}</div>
+                        <div class="col-md-6">${renderCampo('Marca', maquina.marca)}</div>
+                        <div class="col-md-6">${renderCampo('Modelo', maquina.modelo)}</div>
+                        <div class="col-md-6">${renderCampo('Número de Serie', maquina.numeroSerie)}</div>
+                        <div class="col-md-6">${renderCampo('Número de Copias Total', maquina.numeroCopias)}</div>
+
+                        <div class="col-md-6">${renderCampo('Copias Blanco y Negro', maquina.copiasBn)}</div>
+                        <div class="col-md-6">${renderCampo('Copias Color', maquina.copiasColor)}</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6 class="text-success border-bottom pb-2 fw-bold"><i class="bi bi-building me-2"></i>2. Procedencia</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">${renderCampo('Cliente de Procedencia', maquina.clienteProcedencia)}</div>
+                        <div class="col-md-6">${renderCampo('Fecha de Entrada', maquina.fechaEntrada)}</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6 class="text-success border-bottom pb-2 fw-bold"><i class="bi bi-clipboard2-pulse me-2"></i>3. Estado Técnico</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">${renderCampo('Inspección Visual', renderBadgeVisual(maquina.estadoVisual))}</div>
+                        <div class="col-md-6">${renderCampo('Estado de Funcionamiento', maquina.estadoFuncionamiento)}</div>
+                        <div class="col-md-6">${renderCampo('Averías o Códigos', maquina.averiasCodigos)}</div>
+                    </div>
+                </div>
+                <div>
+                    <h6 class="text-success border-bottom pb-2 fw-bold"><i class="bi bi-geo-alt me-2"></i>4. Ubicación, Preparación y Notas</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">${renderCampo('Ubicación Física', maquina.ubicacionFisica)}</div>
+                        <div class="col-md-6">${renderCampo('Preparado por Técnico', maquina.tecnicoPreparadoComercial || 'Sin asignar')}</div>
+                        <div class="col-md-12">${renderCampo('Observaciones', maquina.observaciones)}</div>
+                    </div>
+                </div>
+                ${excepcionSeccion}
+            </div>`;
+
+            document.getElementById('cuerpoDetalleComercial').innerHTML = html;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetalleComercial')).show();
+        }
+
+
+        // ─── Reserva: abrir modal ─────────────────────────────
+        function abrirModalReserva(id, event) {
+            if (event) event.stopPropagation(); // no abrir detalle
+            maquinaParaReservar = id;
+            document.getElementById('inputObservacionReserva').value = '';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('alertaReservaError').classList.add('d-none');
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalReserva')).show();
+        }
+
+        // ─── Reserva: confirmar ───────────────────────────────
+        function confirmarReserva() {
+            const observacion = document.getElementById('inputObservacionReserva').value.trim();
+            const alerta = document.getElementById('alertaReservaError');
+            if (!observacion) {
+                alerta.classList.remove('d-none');
+                return;
+            }
+            alerta.classList.add('d-none');
+
+            const btn = document.getElementById('btnConfirmarReserva');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+            fetch(`${API_BASE}/maquinas/${maquinaParaReservar}/reservar?observacion=${encodeURIComponent(observacion)}&usuario=${encodeURIComponent(nombreUsuario)}`, {
+                method: 'PUT'
+            })
+            .then(res => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-bookmark-check me-2"></i>Confirmar Reserva';
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('modalReserva')).hide();
+
+                if (res.ok) {
+                    mostrarToast(`✅ Máquina reservada correctamente para: ${observacion}`, 'success');
+                    cargarCatalogo();
+                } else if (res.status === 409) {
+                    mostrarToast('⚠️ Esta máquina ya fue reservada por otro comercial.', 'warning');
+                    cargarCatalogo();
+                } else {
+                    mostrarToast('❌ Error al procesar la reserva.', 'danger');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-bookmark-check me-2"></i>Confirmar Reserva';
+                mostrarToast('❌ Error de conexión con el servidor.', 'danger');
+            });
+        }
+
+        // ─── Revocar reserva (solo supervisor) ───────────────
+        function revocarReserva(id) {
+            const maquina = reservadasCompleto.find(m => m.id === id);
+            const nombreM = maquina ? `${maquina.marca} ${maquina.modelo}` : `ID ${id}`;
+            if (!confirm(`¿Confirma revocar la reserva de "${nombreM}"?\nLa máquina volverá a estar disponible en el catálogo.`)) return;
+
+            fetch(`${API_BASE}/maquinas/${id}/revocar-reserva?supervisor=${encodeURIComponent(nombreUsuario)}`, {
+                method: 'PUT'
+            })
+            .then(res => {
+                if (res.ok) {
+                    mostrarToast(`✅ Reserva de "${nombreM}" revocada correctamente.`, 'success');
+                    cargarCatalogo();
+                } else {
+                    mostrarToast('❌ Error al revocar la reserva.', 'danger');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarToast('❌ Error de conexión con el servidor.', 'danger');
+            });
+        }
+
+        // ─── Helpers ──────────────────────────────────────────
+        function renderBadgeVisual(estado) {
+            let clase = 'bg-secondary';
+            if (estado === 'Óptimo') clase = 'bg-success';
+            if (estado === 'Aceptable') clase = 'bg-warning text-dark';
+            if (estado === 'Deficiente') clase = 'bg-danger';
+            return `<span class="badge ${clase}">${estado || 'Sin inspeccionar'}</span>`;
+        }
+
+        function esc(str) {
+            if (!str) return '<em class="text-muted">Sin datos</em>';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function mostrarToast(mensaje, tipo) {
+            const toast = document.getElementById('toastComercial');
+            const body = document.getElementById('toastBody');
+            body.textContent = mensaje;
+            toast.className = `toast align-items-center text-white border-0 bg-${tipo}`;
+            const bsToast = bootstrap.Toast.getOrCreateInstance(toast, { delay: 4000 });
+            bsToast.show();
+        }
+
+        function cerrarSesion(event) {
+            if (event) event.preventDefault();
+            localStorage.removeItem('trazabilidad_session');
+            window.location.href = '/login.html';
+        }
+    </script>
+
+</body>
+</html>
+
