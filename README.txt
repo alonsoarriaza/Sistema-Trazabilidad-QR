@@ -1,6 +1,3 @@
-Aquí tienes el README rediseñado para que sea mucho más visual, estructurado y profesional, utilizando un nombre genérico (**TechCorp**) y términos de trazabilidad para sustituir el nombre de la empresa por privacidad.
-
----
 
 # 📦 SISTEMA DE GESTIÓN DE INVENTARIO Y SISTEMA QR
 
