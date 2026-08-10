@@ -171,6 +171,9 @@ public class Maquina {
     @Column(name = "copias_color")
     private Integer copiasColor;
 
+    @Column(name = "es_color")
+    private Boolean esColor = false;
+
     /**
      * Estado de venta comercial de la máquina.
      * Valores: null (disponible), "RESERVADA" (reservada por un comercial).
@@ -443,6 +446,14 @@ public class Maquina {
 
     public void setModeloToner(String modeloToner) {
         this.modeloToner = modeloToner;
+    }
+
+    public Boolean getEsColor() {
+        return esColor != null ? esColor : false;
+    }
+
+    public void setEsColor(Boolean esColor) {
+        this.esColor = esColor;
     }
 }
 

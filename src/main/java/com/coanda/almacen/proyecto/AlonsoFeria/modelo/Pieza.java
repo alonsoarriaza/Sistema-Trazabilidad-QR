@@ -139,6 +139,9 @@ public class Pieza {
     @Column(name = "observaciones")
     private String observaciones;
 
+    @Column(name = "color_variante")
+    private String colorVariante;
+
     /**
      * Estado actual de la pieza dentro del flujo de gestión.
      * Valores permitidos: "En almacén", "Para reparación",
@@ -319,6 +322,14 @@ public class Pieza {
 
     public void setDestinoCliente(String destinoCliente) {
         this.destinoCliente = destinoCliente;
+    }
+
+    public String getColorVariante() {
+        return colorVariante;
+    }
+
+    public void setColorVariante(String colorVariante) {
+        this.colorVariante = colorVariante;
     }
 
     // ───────────────── Conversores JPA Custom ─────────────────

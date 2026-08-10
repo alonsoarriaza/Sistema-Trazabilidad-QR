@@ -178,6 +178,7 @@ public class MaquinaService {
             maquina.setEstadoVisual(datosNuevos.getEstadoVisual());
             maquina.setNivelToner(datosNuevos.getNivelToner());
             maquina.setPreparadaComercial(datosNuevos.getPreparadaComercial());
+            maquina.setEsColor(datosNuevos.getEsColor());
 
             Maquina guardada = maquinaRepository.save(maquina);
             historialService.registrarMovimiento("MAQUINA", guardada.getId(), "EDICION",

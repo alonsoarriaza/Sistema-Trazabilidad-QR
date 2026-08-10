@@ -198,6 +198,7 @@ public class PiezaService {
             pieza.setFechaAlta(datosNuevos.getFechaAlta());
             pieza.setFechaUsoBaja(datosNuevos.getFechaUsoBaja());
             pieza.setObservaciones(datosNuevos.getObservaciones());
+            pieza.setColorVariante(datosNuevos.getColorVariante());
             
             String estadoAnterior = pieza.getEstadoPieza();
             pieza.setEstadoPieza(datosNuevos.getEstadoPieza());
