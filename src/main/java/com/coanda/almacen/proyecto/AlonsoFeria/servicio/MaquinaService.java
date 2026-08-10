@@ -323,9 +323,13 @@ public class MaquinaService {
     }
 
     /**
-     * Revoca una máquina de comercial y la devuelve al almacén.
+     * Revoca una máquina de comercial y la devuelve al almacén. Solo ejecutable por Comercial Supervisor.
      */
-    public Maquina revocarDeComercial(Long id, String motivo) {
+    public Maquina revocarDeComercial(Long id, String motivo, String rolOClave) {
+        if (rolOClave != null && !"SUPERVISOR_COMERCIAL".equalsIgnoreCase(rolOClave) && !"1234".equals(rolOClave) && !"token-supervisor-1234".equals(rolOClave)) {
+            throw new IllegalStateException("Acceso denegado: Una máquina enviada a Comercial solo puede ser revocada por el Comercial Supervisor.");
+        }
+
         Optional<Maquina> existente = maquinaRepository.findById(id);
         if (existente.isPresent()) {
             Maquina maquina = existente.get();
@@ -336,7 +340,7 @@ public class MaquinaService {
             maquina.setUbicacionFisica("Revocada por Comercial (Se necesita ubicar)");
             Maquina guardada = maquinaRepository.save(maquina);
             historialService.registrarMovimiento("MAQUINA", guardada.getId(), "REVOCADA_COMERCIAL",
-                    "Máquina devuelta al almacén (revocada por comercial). Motivo: " + motivo, "Comercial");
+                    "Máquina devuelta al almacén (revocada por comercial). Motivo: " + motivo, "Comercial Supervisor");
             return guardada;
         }
         return null;

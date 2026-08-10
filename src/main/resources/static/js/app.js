@@ -1097,10 +1097,19 @@ function mostrarFichaPieza(pieza, pushToHistory = true) {
     html += '    <div class="mb-4">';
     html += '      <h6 class="text-accent border-bottom pb-2 fw-bold"><i class="bi bi-clipboard2-pulse me-2"></i>3. Estado y Clasificación</h6>';
     html += '      <div class="row g-3">';
+    const esPiezaBloqueadaComercial = pieza.estadoPieza === 'Para comercial' || 
+                                      pieza.estadoPieza === 'Bloqueada por comercial' || 
+                                      (pieza.destinoCliente && pieza.destinoCliente.toLowerCase().includes('comercial'));
+
+    let estadoPiezaHtml = pieza.estadoPieza || 'En almacén';
+    if (esPiezaBloqueadaComercial) {
+        estadoPiezaHtml = '<span class="badge bg-danger text-white fs-6 p-2"><i class="bi bi-lock-fill me-1"></i>BLOQUEADA POR COMERCIAL</span>';
+    }
+
     html += '        <div class="col-md-6">' + renderCampoFicha('Nivel de Estado', renderBadgeNivel(pieza.nivelEstado)) + '</div>';
-    html += '        <div class="col-md-6">' + renderCampoFicha('Estado de la Pieza', pieza.estadoPieza || 'En almacén') + '</div>';
-    if (pieza.estadoPieza === 'Para cliente') {
-        html += '        <div class="col-md-6">' + renderCampoFicha('Destino Cliente', pieza.destinoCliente) + '</div>';
+    html += '        <div class="col-md-6">' + renderCampoFicha('Estado de la Pieza', estadoPiezaHtml) + '</div>';
+    if (pieza.estadoPieza === 'Para cliente' || esPiezaBloqueadaComercial) {
+        html += '        <div class="col-md-6">' + renderCampoFicha('Destino Cliente', pieza.destinoCliente || 'Comercial') + '</div>';
     }
     html += '      </div>';
     html += '    </div>';
@@ -1127,7 +1136,9 @@ function mostrarFichaPieza(pieza, pushToHistory = true) {
     // Configurar botón para devolver al almacén
     const btnDevolver = document.getElementById('btnDevolverPieza');
     if (btnDevolver) {
-        if (pieza.estadoPieza && pieza.estadoPieza !== 'En almacén') {
+        if (esPiezaBloqueadaComercial) {
+            btnDevolver.classList.add('d-none');
+        } else if (pieza.estadoPieza && pieza.estadoPieza !== 'En almacén') {
             btnDevolver.classList.remove('d-none');
             btnDevolver.onclick = function() {
                 devolverPiezaAlAlmacen(pieza.id);
@@ -1563,11 +1574,16 @@ function renderFilaComponente(maquina, piezaExistente, tipo, col) {
     html += '    <span class="fw-bold text-white fs-5">' + displayName + '</span>';
     if (piezaExistente) {
         let badgeClase = 'bg-info';
+        let textoEstado = piezaExistente.estadoPieza || 'Extraída';
         if (piezaExistente.estadoPieza === 'Para reparación') badgeClase = 'bg-warning text-dark';
         if (piezaExistente.estadoPieza === 'Para cliente') badgeClase = 'bg-primary';
         if (piezaExistente.estadoPieza === 'En almacén') badgeClase = 'bg-success';
+        if (piezaExistente.estadoPieza === 'Para comercial' || piezaExistente.estadoPieza === 'Bloqueada por comercial' || (piezaExistente.destinoCliente && piezaExistente.destinoCliente.toLowerCase().includes('comercial'))) {
+            badgeClase = 'bg-danger text-white';
+            textoEstado = '<i class="bi bi-lock-fill me-1"></i>BLOQUEADA POR COMERCIAL';
+        }
 
-        html += '    <span class="badge ' + badgeClase + '">' + piezaExistente.estadoPieza + '</span>';
+        html += '    <span class="badge ' + badgeClase + '">' + textoEstado + '</span>';
         if (piezaExistente.id !== 0) {
             html += '    <span class="small text-secondary">QR: <a href="#" class="text-accent" onclick="event.preventDefault(); cargarFichaPiezaPorId(' + piezaExistente.id + ')">' + piezaExistente.codigoQrPieza + '</a></span>';
         } else {

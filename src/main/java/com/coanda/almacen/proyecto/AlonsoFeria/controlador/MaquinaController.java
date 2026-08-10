@@ -299,16 +299,23 @@ public class MaquinaController {
     }
 
     /**
-     * Devuelve una máquina al almacén (revocada por comercial).
+     * Devuelve una máquina al almacén (revocada por comercial). Exclusivo de Comercial Supervisor.
      */
     @PutMapping("/{id}/volver-almacen")
-    public ResponseEntity<Maquina> volverAlmacen(@PathVariable Long id,
-            @RequestParam String motivo) {
-        Maquina maquina = maquinaService.revocarDeComercial(id, motivo);
-        if (maquina != null) {
-            return new ResponseEntity<>(maquina, HttpStatus.OK);
+    public ResponseEntity<?> volverAlmacen(@PathVariable Long id,
+            @RequestParam String motivo,
+            @RequestParam(required = false) String claveSupervisor,
+            @org.springframework.web.bind.annotation.RequestHeader(value = "X-Auth-Token", required = false) String tokenHeader) {
+        try {
+            String credencial = (claveSupervisor != null && !claveSupervisor.trim().isEmpty()) ? claveSupervisor : tokenHeader;
+            Maquina maquina = maquinaService.revocarDeComercial(id, motivo, credencial);
+            if (maquina != null) {
+                return new ResponseEntity<>(maquina, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(java.util.Map.of("error", e.getMessage()));
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     /**

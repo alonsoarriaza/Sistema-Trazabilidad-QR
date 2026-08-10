@@ -201,6 +201,18 @@ public class PiezaService {
             pieza.setColorVariante(datosNuevos.getColorVariante());
             
             String estadoAnterior = pieza.getEstadoPieza();
+            String destinoAnterior = pieza.getDestinoCliente();
+            
+            boolean esBloqueadaComercial = "Para comercial".equalsIgnoreCase(estadoAnterior) || 
+                                           "Bloqueada por comercial".equalsIgnoreCase(estadoAnterior) ||
+                                           (destinoAnterior != null && destinoAnterior.toLowerCase().contains("comercial"));
+
+            if (esBloqueadaComercial) {
+                if ("Instalada".equalsIgnoreCase(datosNuevos.getEstadoPieza()) || "En almacén".equalsIgnoreCase(datosNuevos.getEstadoPieza())) {
+                    throw new IllegalStateException("La pieza está BLOQUEADA POR COMERCIAL y no se puede volver a instalar ni almacenar.");
+                }
+            }
+
             pieza.setEstadoPieza(datosNuevos.getEstadoPieza());
             pieza.setDestinoCliente(datosNuevos.getDestinoCliente());
 

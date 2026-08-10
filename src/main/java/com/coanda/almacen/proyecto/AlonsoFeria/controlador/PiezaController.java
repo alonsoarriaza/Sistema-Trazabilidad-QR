@@ -146,18 +146,21 @@ public class PiezaController {
      * @return ResponseEntity con la pieza actualizada o HTTP 404.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Pieza> actualizarPieza(
+    public ResponseEntity<?> actualizarPieza(
             @PathVariable Long id,
             @RequestBody Pieza datosNuevos,
             @org.springframework.web.bind.annotation.RequestParam(required = false) String tecnico) {
+        try {
+            Pieza actualizada = piezaService.actualizarPieza(id, datosNuevos, tecnico);
 
-        Pieza actualizada = piezaService.actualizarPieza(id, datosNuevos, tecnico);
+            if (actualizada != null) {
+                return new ResponseEntity<>(actualizada, HttpStatus.OK);
+            }
 
-        if (actualizada != null) {
-            return new ResponseEntity<>(actualizada, HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     /**

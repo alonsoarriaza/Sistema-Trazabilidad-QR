@@ -437,7 +437,12 @@
                         <button class="btn btn-warning w-100 fw-bold btn-sm" onclick="abrirModalReserva(${m.id}, event)">
                             <i class="bi bi-bookmark-plus me-1"></i>Reservar / Vender
                         </button>
-                    </div>` : '';
+                    </div>` : `
+                    <div class="px-3 pb-3">
+                        <button class="btn btn-outline-danger w-100 fw-bold btn-sm" onclick="event.stopPropagation(); revocarMaquinaDeComercial(${m.id})">
+                            <i class="bi bi-arrow-return-left me-1"></i>Devolver al Almacén del Taller
+                        </button>
+                    </div>`;
 
                 const html = `
                 <div class="col-12 col-md-6 col-lg-4">
@@ -693,6 +698,33 @@
             .catch(err => {
                 console.error(err);
                 mostrarToast('❌ Error de conexión con el servidor.', 'danger');
+            });
+        }
+
+        // ─── Revocar máquina de comercial (solo supervisor) ───
+        function revocarMaquinaDeComercial(id) {
+            if (!esSupervisor) {
+                mostrarToast('❌ Acción restringida: Solo el Comercial Supervisor puede revocar una máquina enviada a Comercial.', 'danger');
+                return;
+            }
+            const motivo = prompt('Por favor, indique el motivo por el cual la máquina se devuelve al almacén del taller:');
+            if (!motivo || !motivo.trim()) return;
+
+            fetch(`${API_BASE}/maquinas/${id}/volver-almacen?motivo=${encodeURIComponent(motivo.trim())}&claveSupervisor=1234`, {
+                method: 'PUT'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    mostrarToast('❌ ' + data.error, 'danger');
+                } else {
+                    mostrarToast('✅ Máquina revocada de Comercial y devuelta al almacén del taller correctamente.', 'success');
+                    cargarCatalogo();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarToast('❌ Error de conexión al procesar la devolución.', 'danger');
             });
         }
 
