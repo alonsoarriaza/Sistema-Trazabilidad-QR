@@ -21,6 +21,34 @@
 // se dirigen automáticamente a esa misma dirección sin necesidad de hardcodear.
 const API_BASE = window.location.origin + '/api';
 
+// Interceptor Global de Seguridad para Inyectar X-Auth-Token en Peticiones REST
+(function() {
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        
+        let token = 'token-tecnico-1111';
+        const sessionStr = localStorage.getItem('coanda_session');
+        if (sessionStr) {
+            try {
+                const session = JSON.parse(sessionStr);
+                if (session && session.token) {
+                    token = session.token;
+                }
+            } catch(e) {}
+        }
+        
+        if (options.headers instanceof Headers) {
+            options.headers.set('X-Auth-Token', token);
+        } else if (typeof options.headers === 'object') {
+            options.headers['X-Auth-Token'] = token;
+        }
+        
+        return originalFetch(url, options);
+    };
+})();
+
 // ─────────── Variables globales ───────────
 // Instancia del escáner QR (html5-qrcode). Se inicializa la primera vez
 // que el técnico pulsa "Iniciar Cámara" y se reutiliza en escaneos sucesivos.

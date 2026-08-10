@@ -21,6 +21,27 @@
                 localStorage.removeItem('coanda_session');
                 window.location.href = '/login.html';
             }
+
+            // Interceptor Global de Seguridad para Inyectar X-Auth-Token
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options) {
+                options = options || {};
+                options.headers = options.headers || {};
+                let token = 'token-comercial-coanda2026';
+                const sStr = localStorage.getItem('coanda_session');
+                if (sStr) {
+                    try {
+                        const s = JSON.parse(sStr);
+                        if (s && s.token) token = s.token;
+                    } catch(e) {}
+                }
+                if (options.headers instanceof Headers) {
+                    options.headers.set('X-Auth-Token', token);
+                } else if (typeof options.headers === 'object') {
+                    options.headers['X-Auth-Token'] = token;
+                }
+                return originalFetch(url, options);
+            };
         })();
     </script>
     <!-- Bootstrap 5.3 via CDN -->
