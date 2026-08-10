@@ -51,7 +51,7 @@ El acceso al sistema está protegido por un login inicial. Para ingresar, es nec
 
 ### 💼 ROL: COMERCIAL
 
-* **Contraseña de Acceso:** `techcorp2026`
+* **Contraseña de Acceso:** `coanda2026`
 * ✅ **Permisos y Acceso:**
   - Redirección automática al catálogo comercial (`comercial.html`) al iniciar sesión.
   - Visualización **EXCLUSIVA** de los equipos marcados por el servicio técnico como *"Preparada para Comercial"* (`preparada_comercial = true`).
