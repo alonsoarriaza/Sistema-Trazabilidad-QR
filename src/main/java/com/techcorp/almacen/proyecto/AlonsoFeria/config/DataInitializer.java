@@ -39,6 +39,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        if (maquinaRepository.count() > 0) {
+            System.out.println("Base de datos ya inicializada. Omitiendo importación y soft reset.");
+            return;
+        }
         // 1. Si la base de datos está vacía, importamos el catálogo maestro
         if (maquinaRepository.count() == 0) {
             System.out.println("Base de datos vacía. Inicializando catálogo maestro desde importacion.csv...");

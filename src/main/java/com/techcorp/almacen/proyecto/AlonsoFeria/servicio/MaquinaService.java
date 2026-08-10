@@ -84,20 +84,34 @@ public class MaquinaService {
                     "Registro inicial de la máquina " + guardada.getMarca() + " " + guardada.getModelo() + " (S/N: "
                             + guardada.getNumeroSerie() + ")",
                     tecnico);
-            
-            // Crear automáticamente el tóner inicial instalado en la máquina
-            Toner toner = new Toner();
-            if (maquina.getModeloToner() != null && !maquina.getModeloToner().trim().isEmpty()) {
-                toner.setModelo(maquina.getModeloToner().trim());
+
+            if (maquina.getTonerId() != null) {
+                Optional<Toner> tonerOpt = tonerService.buscarPorId(maquina.getTonerId());
+                if (tonerOpt.isPresent()) {
+                    Toner tExistente = tonerOpt.get();
+                    tExistente.setEstado("EN MÁQUINA");
+                    tExistente.setMaquinaOrigenSerie(guardada.getNumeroSerie());
+                    tExistente.setUbicacionFisica("En máquina");
+                    if (guardada.getNivelToner() != null && !guardada.getNivelToner().trim().isEmpty()) {
+                        tExistente.setNivelToner(guardada.getNivelToner());
+                    }
+                    tonerService.guardarToner(tExistente, tecnico);
+                }
             } else {
-                toner.setModelo(guardada.getModelo() + " (Tóner)");
+                // Crear automáticamente el tóner inicial instalado en la máquina
+                Toner toner = new Toner();
+                if (maquina.getModeloToner() != null && !maquina.getModeloToner().trim().isEmpty()) {
+                    toner.setModelo(maquina.getModeloToner().trim());
+                } else {
+                    toner.setModelo(guardada.getModelo() + " (Tóner)");
+                }
+                toner.setNivelToner(guardada.getNivelToner() != null && !guardada.getNivelToner().isEmpty() ? guardada.getNivelToner() : "100%");
+                toner.setEstado("En máquina");
+                toner.setMaquinaOrigenSerie(guardada.getNumeroSerie());
+                toner.setUbicacionFisica("En máquina");
+                toner.setFechaRegistro(java.time.LocalDate.now());
+                tonerService.guardarToner(toner, tecnico);
             }
-            toner.setNivelToner(guardada.getNivelToner() != null && !guardada.getNivelToner().isEmpty() ? guardada.getNivelToner() : "100%");
-            toner.setEstado("En máquina");
-            toner.setMaquinaOrigenSerie(guardada.getNumeroSerie());
-            toner.setUbicacionFisica("En máquina");
-            toner.setFechaRegistro(java.time.LocalDate.now());
-            tonerService.guardarToner(toner, tecnico);
         } else {
             historialService.registrarMovimiento("MAQUINA", guardada.getId(), "EDICION",
                     "Edición de datos de la máquina", tecnico);
@@ -178,6 +192,7 @@ public class MaquinaService {
             maquina.setEstadoVisual(datosNuevos.getEstadoVisual());
             maquina.setNivelToner(datosNuevos.getNivelToner());
             maquina.setPreparadaComercial(datosNuevos.getPreparadaComercial());
+            maquina.setEsColor(datosNuevos.getEsColor());
 
             Maquina guardada = maquinaRepository.save(maquina);
             historialService.registrarMovimiento("MAQUINA", guardada.getId(), "EDICION",
@@ -498,6 +513,10 @@ public class MaquinaService {
         if (!Objects.equals(vieja.getNivelToner(), nueva.getNivelToner())) {
             sb.append("Nivel Tóner ('").append(vieja.getNivelToner()).append("' -> '")
                     .append(nueva.getNivelToner()).append("'), ");
+            hayCambios = true;
+        }
+        if (!Objects.equals(vieja.getEsColor(), nueva.getEsColor())) {
+            sb.append("Color (").append(vieja.getEsColor()).append(" -> ").append(nueva.getEsColor()).append("), ");
             hayCambios = true;
         }
 

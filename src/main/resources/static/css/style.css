@@ -557,10 +557,64 @@ input, select, textarea {
 .btn-inv:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 20px rgba(32, 191, 85, 0.4) !important;
-}
 .btn-inv:active {
     transform: translateY(1px) !important;
 }
+
+/* ─────────── Estilos Personalizados para la Extracción Color/Monocromo ─────────── */
+.bg-dark-50 {
+    background-color: #f8f9fa !important;
+}
+
+/* Botón Cyan (C) */
+.btn-outline-info {
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+.btn-outline-info:hover, .btn-outline-info:focus {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+/* Botón Magenta (M) */
+.btn-outline-danger {
+    color: #d63384 !important;
+    border-color: #d63384 !important;
+}
+.btn-outline-danger:hover, .btn-outline-danger:focus {
+    background-color: #d63384 !important;
+    color: #ffffff !important;
+}
+
+/* Botón Amarillo (Y) */
+.btn-outline-warning {
+    color: #ffc107 !important;
+    border-color: #ffc107 !important;
+}
+.btn-outline-warning:hover, .btn-outline-warning:focus {
+    background-color: #ffc107 !important;
+    color: #000000 !important;
+}
+
+/* Botón Negro (K) */
+.btn-outline-light {
+    color: #212529 !important;
+    border-color: #212529 !important;
+}
+.btn-outline-light:hover, .btn-outline-light:focus {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+}
+
+/* Switch de Color de máquina */
+#chkMaquinaColor {
+    cursor: pointer;
+}
+#chkMaquinaColor:checked {
+    background-color: var(--coanda-accent) !important;
+    border-color: var(--coanda-accent) !important;
+}
+
 
 
 

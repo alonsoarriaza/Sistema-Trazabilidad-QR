@@ -154,6 +154,13 @@ public class Pieza {
     @Column(name = "destino_cliente")
     private String destinoCliente;
 
+    /**
+     * Variante de color para tambores o reveladores (C, M, Y, K), o null si es monocromo/no aplica.
+     */
+    @Column(name = "color_variante")
+    private String colorVariante;
+
+
     // ───────────────── Constructor vacío (JPA) ─────────────────
 
     /**
@@ -311,6 +318,14 @@ public class Pieza {
 
     public void setEstadoPieza(String estadoPieza) {
         this.estadoPieza = estadoPieza;
+    }
+
+    public String getColorVariante() {
+        return colorVariante;
+    }
+
+    public void setColorVariante(String colorVariante) {
+        this.colorVariante = colorVariante;
     }
 
     public String getDestinoCliente() {

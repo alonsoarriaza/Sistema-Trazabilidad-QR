@@ -144,6 +144,9 @@ public class Maquina {
     @Transient
     private String modeloToner;
 
+    @Transient
+    private Long tonerId;
+
     /**
      * Campo libre para anotaciones adicionales del técnico que recibe
      * o evalúa la máquina (ej. "Falta tapa lateral", "Olor a quemado").
@@ -191,6 +194,9 @@ public class Maquina {
      */
     @Column(name = "comercial_reserva")
     private String comercialReserva;
+
+    @Column(name = "es_color")
+    private Boolean esColor = false;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "maquina_origen_serie", referencedColumnName = "numero_serie", insertable = false, updatable = false)
@@ -443,6 +449,22 @@ public class Maquina {
 
     public void setModeloToner(String modeloToner) {
         this.modeloToner = modeloToner;
+    }
+
+    public Long getTonerId() {
+        return tonerId;
+    }
+
+    public void setTonerId(Long tonerId) {
+        this.tonerId = tonerId;
+    }
+
+    public Boolean getEsColor() {
+        return esColor;
+    }
+
+    public void setEsColor(Boolean esColor) {
+        this.esColor = esColor;
     }
 }
 

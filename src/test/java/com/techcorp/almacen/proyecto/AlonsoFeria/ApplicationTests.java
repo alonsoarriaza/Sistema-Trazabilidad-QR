@@ -123,7 +123,7 @@ class ApplicationTests {
 
 		Pieza pieza = new Pieza();
 		pieza.setCodigoQrPieza(qrPiezaUnico);
-		pieza.setTipoPieza("Fusor");
+		pieza.setTipoPieza("TAMBOR");
 		pieza.setReferencia("REF-12345");
 		pieza.setMarcaModeloCompatible("HP LaserJet Pro");
 		pieza.setNumeroSerieMaquinaOrigen(numSerieOrigen); // Relacionada con la máquina creada arriba
@@ -144,7 +144,7 @@ class ApplicationTests {
 		assertTrue(recuperadaOpt.isPresent(), "La pieza debería poder recuperarse de la base de datos.");
 		Pieza recuperada = recuperadaOpt.get();
 
-		assertEquals("Fusor", recuperada.getTipoPieza());
+		assertEquals("TAMBOR", recuperada.getTipoPieza());
 		assertEquals("REF-12345", recuperada.getReferencia());
 		assertEquals("Cajón A-1", recuperada.getUbicacionFisica());
 		assertEquals(1, recuperada.getNivelEstado());

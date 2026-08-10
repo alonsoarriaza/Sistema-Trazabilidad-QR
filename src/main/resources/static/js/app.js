@@ -130,12 +130,8 @@ function mostrarVista(nombre, pushToHistory = true, stateData = null) {
         cargarListaToners();
     } else if (nombre === 'reimpresion') {
         cargarListasReimpresion();
-    } else if (nombre === 'inventario') {
-        // Reiniciar estado visual del inventario
-        document.getElementById('loadingInventario').classList.add('d-none');
-        document.getElementById('resultadosInventario').classList.add('d-none');
-        if (inventarioInterval) clearInterval(inventarioInterval);
-        if (inventarioTimeout) clearTimeout(inventarioTimeout);
+    } else if (nombre === 'formMaquina') {
+        aplicarParametrosUrlFormMaquina();
     }
 
     if (nombre === 'formMaquina') {
@@ -382,6 +378,8 @@ function buscarPorQrManual() {
  */
 function abrirFormMaquinaConQr(codigoQr) {
     document.getElementById('maqId').value = '';
+    const hiddenTonerId = document.getElementById('maqTonerId');
+    if (hiddenTonerId) hiddenTonerId.value = '';
     document.getElementById('formMaquina').reset();
     document.getElementById('tituloFormMaquina').textContent = 'Nueva Máquina';
     // Generar un código QR aleatorio si no se proporciona uno
@@ -444,9 +442,11 @@ function guardarMaquina(event) {
         estadoVisual: estadoVisual,
         nivelToner: document.getElementById('maqNivelToner').value,
         modeloToner: document.getElementById('maqModeloToner').value.trim(),
+        tonerId: document.getElementById('maqTonerId') && document.getElementById('maqTonerId').value ? parseInt(document.getElementById('maqTonerId').value) : null,
         preparadaComercial: document.getElementById('maqPreparadaComercial').value === 'true',
         ubicacionFisica: document.getElementById('maqUbicacionFisica').value,
-        observaciones: document.getElementById('maqObservaciones').value
+        observaciones: document.getElementById('maqObservaciones').value,
+        esColor: document.getElementById('maqEsColor').checked
     };
 
     var url = API_BASE + '/maquinas';
@@ -482,6 +482,7 @@ function guardarMaquina(event) {
     .then(function(maquina) {
         var mensaje = id ? 'Máquina actualizada correctamente.' : 'Máquina registrada correctamente.';
         mostrarToast(mensaje, 'success');
+        if (document.getElementById('maqTonerId')) document.getElementById('maqTonerId').value = '';
         limpiarBorradorMaquina();
         mostrarFichaMaquina(maquina);
         
@@ -749,6 +750,7 @@ function cargarMaquinaEnFormulario(maquina, pushToHistory = true) {
     document.getElementById('maqUbicacionFisica').value = maquina.ubicacionFisica || '';
     document.getElementById('maqObservaciones').value = maquina.observaciones || '';
     document.getElementById('maqModeloToner').value = '';
+    document.getElementById('maqEsColor').checked = maquina.esColor === true;
 
     actualizarToneresCompatibles(maquina.modelo || '', true);
 
@@ -1406,93 +1408,21 @@ function cargarComponentesEHistorialMaquina(maquina) {
 
     if (!contenedorLista || !contenedorHistorial) return;
 
+    // Rellenar información de cabecera de extracción
+    const headerMarca = document.getElementById('extHeaderMarca');
+    const headerModelo = document.getElementById('extHeaderModelo');
+    const headerSerie = document.getElementById('extHeaderSerie');
+    if (headerMarca) headerMarca.textContent = maquina.marca || '-';
+    if (headerModelo) headerModelo.textContent = maquina.modelo || '-';
+    if (headerSerie) headerSerie.textContent = maquina.numeroSerie || '-';
+
     contenedorLista.innerHTML = '<div class="text-center text-secondary py-3"><div class="spinner-border spinner-border-sm me-2"></div>Cargando piezas...</div>';
     contenedorHistorial.innerHTML = '<div class="text-center text-secondary py-3"><div class="spinner-border spinner-border-sm me-2"></div>Cargando historial...</div>';
 
-    const componentesEstandar = [
-        'Fusor', 'Rodillo de presión', 'Rodillo de calor', 'Placa controladora',
-        'Bandeja superior', 'Bandeja inferior', 'Tambor', 'Unidad de imagen',
-        'Motor principal', 'Fuente de alimentación', 'Panel de control', 'Tóner'
-    ];
-
-    const fetchPiezas = fetch(API_BASE + '/piezas/maquina/' + encodeURIComponent(maquina.numeroSerie))
-        .then(function(res) { return res.ok ? res.json() : []; });
-
-    const fetchToner = fetch(API_BASE + '/toners/instalado/' + encodeURIComponent(maquina.numeroSerie))
-        .then(function(res) { return res.ok ? res.json() : null; });
-
-    Promise.all([fetchPiezas, fetchToner])
-        .then(function(resultados) {
-            const piezas = resultados[0];
-            const tonerInstalado = resultados[1];
-            
-            let html = '';
-            componentesEstandar.forEach(function(tipo) {
-                if (tipo === 'Tóner') {
-                    html += '<div class="p-3 bg-input rounded border border-secondary d-flex justify-content-between align-items-center">';
-                    html += '<div>';
-                    html += '<span class="fw-bold text-white fs-5 d-block">' + tipo + '</span>';
-                    if (tonerInstalado) {
-                        html += '<span class="badge bg-secondary me-2">Instalada (En máquina)</span>';
-                        html += '<span class="small text-secondary">QR: <a href="#" class="text-accent" onclick="event.preventDefault(); cargarFichaTonerPorId(' + tonerInstalado.id + ')">' + tonerInstalado.codigoQr + '</a></span>';
-                    } else {
-                        html += '<span class="badge bg-success">En almacén</span>';
-                    }
-                    html += '</div>';
-                    
-                    if (tonerInstalado) {
-                        if (maquina.preparadaComercial) {
-                            html += '<button class="btn btn-outline-warning btn-sm px-3 disabled" disabled="disabled" onclick="event.preventDefault();">';
-                            html += '<i class="bi bi-box-arrow-up me-1"></i>Extraer (Bloqueado Comercial)</button>';
-                        } else {
-                            html += '<button class="btn btn-outline-warning btn-sm px-3" onclick="abrirModalExtraerPieza(\'' + tipo + '\', \'' + maquina.numeroSerie + '\')">';
-                            html += '<i class="bi bi-box-arrow-up me-1"></i>Extraer</button>';
-                        }
-                    } else {
-                        html += '<span class="text-success fs-4"><i class="bi bi-check-circle-fill"></i></span>';
-                    }
-                    html += '</div>';
-                } else {
-                    // Buscar si este componente ya fue extraído (o sea, existe una pieza asociada activa)
-                    const piezaExistente = piezas.find(function(p) {
-                        return p.tipoPieza === tipo && p.estadoPieza !== 'Instalada';
-                    });
-
-                    html += '<div class="p-3 bg-input rounded border border-secondary d-flex justify-content-between align-items-center">';
-                    html += '<div>';
-                    html += '<span class="fw-bold text-white fs-5 d-block">' + tipo + '</span>';
-                    if (piezaExistente) {
-                        let badgeClase = 'bg-info';
-                        if (piezaExistente.estadoPieza === 'Para reparación') badgeClase = 'bg-warning text-dark';
-                        if (piezaExistente.estadoPieza === 'Para cliente') badgeClase = 'bg-primary';
-                        if (piezaExistente.estadoPieza === 'En almacén') badgeClase = 'bg-success';
-
-                        html += '<span class="badge ' + badgeClase + ' me-2">' + piezaExistente.estadoPieza + '</span>';
-                        html += '<span class="small text-secondary">QR: <a href="#" class="text-accent" onclick="event.preventDefault(); cargarFichaPiezaPorId(' + piezaExistente.id + ')">' + piezaExistente.codigoQrPieza + '</a></span>';
-                    } else {
-                        html += '<span class="badge bg-secondary">Instalada (En máquina)</span>';
-                    }
-                    html += '</div>';
-                    
-                    if (!piezaExistente) {
-                        if (maquina.preparadaComercial) {
-                            html += '<button class="btn btn-outline-warning btn-sm px-3 disabled" disabled="disabled" onclick="event.preventDefault();">';
-                            html += '<i class="bi bi-box-arrow-up me-1"></i>Extraer (Bloqueado Comercial)</button>';
-                        } else {
-                            html += '<button class="btn btn-outline-warning btn-sm px-3" onclick="abrirModalExtraerPieza(\'' + tipo + '\', \'' + maquina.numeroSerie + '\')">';
-                            html += '<i class="bi bi-box-arrow-up me-1"></i>Extraer</button>';
-                        }
-                    } else {
-                        html += '<div class="d-flex gap-2 align-items-center">';
-                        html += '<button class="btn btn-outline-info btn-sm px-3" onclick="event.preventDefault(); fetch(API_BASE + \'/piezas/' + piezaExistente.id + '\').then(function(res) { return res.json(); }).then(function(p) { cargarPiezaEnFormulario(p); })">';
-                        html += '<i class="bi bi-pencil-square me-1"></i>Editar</button>';
-                        html += '<span class="text-success fs-4"><i class="bi bi-check-circle-fill"></i></span>';
-                        html += '</div>';
-                    }
-                    html += '</div>';
-                }
-            });
-            contenedorLista.innerHTML = html;
+    fetch(API_BASE + '/piezas/maquina/' + encodeURIComponent(maquina.numeroSerie))
+        .then(function(res) { return res.ok ? res.json() : []; })
+        .then(function(piezas) {
+            renderizarListaComponentes(maquina, piezas, maquina.esColor === true);
         })
         .catch(function(err) {
             console.error(err);
@@ -1501,6 +1431,182 @@ function cargarComponentesEHistorialMaquina(maquina) {
 
     // Cargar historial de la máquina
     cargarHistorialList('MAQUINA', maquina.id, contenedorHistorial);
+}
+
+function renderizarListaComponentes(maquina, piezas, esColor) {
+    const contenedorLista = document.getElementById('listaComponentesMaquina');
+    if (!contenedorLista) return;
+
+    let html = '';
+
+    const tambores = esColor ? ['C', 'M', 'Y', 'K'] : ['K'];
+    const reveladores = esColor ? ['C', 'M', 'Y', 'K'] : ['K'];
+
+    // Renderizar Tambores
+    tambores.forEach(function(col) {
+        const tipo = 'TAMBOR';
+        const piezaExistente = piezas.find(function(p) {
+            return p.tipoPieza === tipo && p.colorVariante === col && p.estadoPieza !== 'Instalada';
+        });
+        html += renderFilaComponente(maquina, piezaExistente, tipo, col);
+    });
+
+    // Renderizar Reveladores
+    reveladores.forEach(function(col) {
+        const tipo = 'REVELADOR';
+        const piezaExistente = piezas.find(function(p) {
+            return p.tipoPieza === tipo && p.colorVariante === col && p.estadoPieza !== 'Instalada';
+        });
+        html += renderFilaComponente(maquina, piezaExistente, tipo, col);
+    });
+
+    // Renderizar piezas estáticas
+    const piezasEstaticas = [
+        'Tóner', 'PLACA ALTA', 'PLACA PRINCIPAL', 'ENGINE', 'PLACA DE TRANSFERENCIA',
+        'FUENTE DE ALIMENTACIÓN', 'DP', 'PLACA CONTROLADORA', 'PUERTA LATERAL',
+        'PUERTA FRONTAL', 'CAJON', 'PANTALLA'
+    ];
+
+    piezasEstaticas.forEach(function(tipo) {
+        let piezaExistente = null;
+        if (tipo === 'Tóner') {
+            const tonerEnMaquina = maquina.toneres && maquina.toneres.some(function(t) {
+                return t.estado === 'En máquina';
+            });
+            if (!tonerEnMaquina) {
+                piezaExistente = {
+                    id: 0,
+                    tipoPieza: 'Tóner',
+                    codigoQrPieza: 'TNR-...',
+                    estadoPieza: 'En almacén'
+                };
+            }
+        } else {
+            piezaExistente = piezas.find(function(p) {
+                return p.tipoPieza === tipo && p.estadoPieza !== 'Instalada';
+            });
+        }
+        html += renderFilaComponente(maquina, piezaExistente, tipo, null);
+    });
+
+    // Renderizar campo libre PIEZA
+    html += renderFilaPiezaLibre(maquina);
+
+    contenedorLista.innerHTML = html;
+}
+
+function renderFilaComponente(maquina, piezaExistente, tipo, col) {
+    const displayName = col ? tipo + ' (' + col + ')' : tipo;
+    const inputId = 'ref-' + tipo.toLowerCase().replace(/ /g, '-') + (col ? '-' + col : '');
+    
+    let html = '<div class="p-3 bg-input rounded border border-secondary d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">';
+    html += '  <div class="d-flex align-items-center gap-2">';
+    html += '    <span class="fw-bold text-white fs-5">' + displayName + '</span>';
+    if (piezaExistente) {
+        let badgeClase = 'bg-info';
+        if (piezaExistente.estadoPieza === 'Para reparación') badgeClase = 'bg-warning text-dark';
+        if (piezaExistente.estadoPieza === 'Para cliente') badgeClase = 'bg-primary';
+        if (piezaExistente.estadoPieza === 'En almacén') badgeClase = 'bg-success';
+
+        html += '    <span class="badge ' + badgeClase + '">' + piezaExistente.estadoPieza + '</span>';
+        if (piezaExistente.id !== 0) {
+            html += '    <span class="small text-secondary">QR: <a href="#" class="text-accent" onclick="event.preventDefault(); cargarFichaPiezaPorId(' + piezaExistente.id + ')">' + piezaExistente.codigoQrPieza + '</a></span>';
+        } else {
+            html += '    <span class="small text-secondary">QR: Extraído</span>';
+        }
+    } else {
+        html += '    <span class="badge bg-secondary">Instalada (En máquina)</span>';
+    }
+    html += '  </div>';
+
+    if (!piezaExistente) {
+        html += '  <div class="d-flex flex-wrap align-items-center gap-2 ms-md-auto">';
+        
+        if (tipo === 'TAMBOR') {
+            html += '    <div class="btn-group btn-group-sm me-1" role="group">';
+            ['C', 'M', 'Y', 'K'].forEach(function(letra) {
+                let btnClass = 'btn-outline-secondary';
+                if (letra === 'C') btnClass = 'btn-outline-info';
+                if (letra === 'M') btnClass = 'btn-outline-danger';
+                if (letra === 'Y') btnClass = 'btn-outline-warning';
+                if (letra === 'K') btnClass = 'btn-outline-light';
+                html += '      <button type="button" class="btn ' + btnClass + ' fw-bold" onclick="document.getElementById(\'' + inputId + '\').value=\'' + letra + '\'">' + letra + '</button>';
+            });
+            html += '    </div>';
+        }
+
+        let preValue = '';
+        let placeholder = 'Referencia (opcional)';
+        if (tipo === 'REVELADOR') {
+            preValue = 'REV.. ';
+            placeholder = 'Completa referencia';
+        }
+        html += '    <input type="text" id="' + inputId + '" class="form-control form-control-sm bg-dark text-white border-secondary" style="width: 140px;" placeholder="' + placeholder + '" value="' + preValue + '">';
+
+        if (maquina.preparadaComercial) {
+            html += '    <button class="btn btn-outline-warning btn-sm px-3 disabled" disabled="disabled" onclick="event.preventDefault();">';
+            html += '      <i class="bi bi-box-arrow-up me-1"></i>Extraer (Bloqueado Comercial)';
+            html += '    </button>';
+        } else {
+            html += '    <button class="btn btn-outline-warning btn-sm px-3" onclick="prepararExtraccion(\'' + tipo + '\', \'' + maquina.numeroSerie + '\', \'' + (col || '') + '\', \'' + inputId + '\')">';
+            html += '      <i class="bi bi-box-arrow-up me-1"></i>Extraer';
+            html += '    </button>';
+        }
+        html += '  </div>';
+    } else {
+        html += '  <div class="d-flex gap-2 align-items-center ms-md-auto">';
+        html += '    <button class="btn btn-outline-info btn-sm px-3" onclick="event.preventDefault(); fetch(API_BASE + \'/piezas/' + piezaExistente.id + '\').then(function(res) { return res.json(); }).then(function(p) { cargarPiezaEnFormulario(p); })">';
+        html += '      <i class="bi bi-pencil-square me-1"></i>Editar';
+        html += '    </button>';
+        html += '    <span class="text-success fs-4"><i class="bi bi-check-circle-fill"></i></span>';
+        html += '  </div>';
+    }
+
+    html += '</div>';
+    return html;
+}
+
+function renderFilaPiezaLibre(maquina) {
+    const inputTypeC = 'custom-piece-type';
+    const inputRefC = 'custom-piece-ref';
+
+    let html = '<div class="p-3 bg-input rounded border border-secondary d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">';
+    html += '  <div class="d-flex align-items-center gap-2">';
+    html += '    <span class="fw-bold text-white fs-5">PIEZA:</span>';
+    html += '    <input type="text" id="' + inputTypeC + '" class="form-control form-control-sm bg-dark text-white border-secondary" style="width: 180px;" placeholder="Nombre de la pieza...">';
+    html += '  </div>';
+
+    html += '  <div class="d-flex flex-wrap align-items-center gap-2 ms-md-auto">';
+    html += '    <input type="text" id="' + inputRefC + '" class="form-control form-control-sm bg-dark text-white border-secondary" style="width: 140px;" placeholder="Referencia (opcional)">';
+
+    if (maquina.preparadaComercial) {
+        html += '    <button class="btn btn-outline-warning btn-sm px-3 disabled" disabled="disabled" onclick="event.preventDefault();">';
+        html += '      <i class="bi bi-box-arrow-up me-1"></i>Extraer (Bloqueado Comercial)';
+        html += '    </button>';
+    } else {
+        html += '    <button class="btn btn-outline-warning btn-sm px-3" onclick="prepararExtraccionLibre(\'' + maquina.numeroSerie + '\')">';
+        html += '      <i class="bi bi-box-arrow-up me-1"></i>Extraer';
+        html += '    </button>';
+    }
+    html += '  </div>';
+    html += '</div>';
+
+    return html;
+}
+
+function prepararExtraccion(tipo, maquinaSerie, color, inputId) {
+    const refVal = document.getElementById(inputId).value;
+    abrirModalExtraerPieza(tipo, maquinaSerie, color, refVal);
+}
+
+function prepararExtraccionLibre(maquinaSerie) {
+    const tipoVal = document.getElementById('custom-piece-type').value.trim();
+    const refVal = document.getElementById('custom-piece-ref').value.trim();
+    if (!tipoVal) {
+        mostrarToast('Debe ingresar el nombre de la pieza.', 'danger');
+        return;
+    }
+    abrirModalExtraerPieza(tipoVal, maquinaSerie, '', refVal);
 }
 
 
@@ -1556,9 +1662,12 @@ function cargarHistorialPieza(pieza) {
 /**
  * Abre el modal para configurar la extracción de la pieza.
  */
-function abrirModalExtraerPieza(tipo, maquinaSerie) {
+function abrirModalExtraerPieza(tipo, maquinaSerie, color, referencia) {
     document.getElementById('extTipoPieza').value = tipo;
     document.getElementById('extMaquinaSerie').value = maquinaSerie;
+    document.getElementById('extColorVariante').value = color || '';
+    document.getElementById('extReferencia').value = referencia || '';
+    
     document.getElementById('extMotivo').value = '';
     document.getElementById('extNivelEstado').value = '2';
     document.getElementById('extObservaciones').value = '';
@@ -1597,6 +1706,8 @@ function confirmarExtraccionPieza(event) {
 
     const tipo = document.getElementById('extTipoPieza').value;
     const serie = document.getElementById('extMaquinaSerie').value;
+    const color = document.getElementById('extColorVariante').value;
+    const referencia = document.getElementById('extReferencia').value;
     const motivo = document.getElementById('extMotivo').value;
     const observaciones = document.getElementById('extObservaciones').value.trim();
     const errorObs = document.getElementById('errorObservacionesCliente');
@@ -1667,6 +1778,8 @@ function confirmarExtraccionPieza(event) {
         nivelEstado: nivelEstado,
         destinoCliente: motivo === 'Para cliente' ? observaciones : null,
         observaciones: observaciones,
+        referencia: referencia || null,
+        colorVariante: color || null,
         fechaAlta: obtenerFechaHoy()
     };
 
@@ -2512,13 +2625,17 @@ function guardarBorradorMaquina() {
         'maqCodigoQr', 'maqMarca', 'maqModelo', 'maqNumeroSerie', 'maqCopiasBn', 'maqCopiasColor',
         'maqClienteProcedencia', 'maqFechaEntrada', 'maqEstadoFuncionamiento',
         'maqAveriasCodigos', 'maqDecisionTecnica', 'maqEstadoVisual', 'maqNivelToner',
-        'maqUbicacionFisica', 'maqObservaciones'
+        'maqUbicacionFisica', 'maqObservaciones', 'maqEsColor'
     ];
     const borrador = {};
     campos.forEach(function(idCampo) {
         const el = document.getElementById(idCampo);
         if (el) {
-            borrador[idCampo] = el.value;
+            if (el.type === 'checkbox') {
+                borrador[idCampo] = el.checked;
+            } else {
+                borrador[idCampo] = el.value;
+            }
         }
     });
     localStorage.setItem('techcorp_draft_maquina', JSON.stringify(borrador));
@@ -2534,8 +2651,12 @@ function restaurarBorradorMaquina() {
             const borrador = JSON.parse(borradorStr);
             Object.keys(borrador).forEach(function(idCampo) {
                 const el = document.getElementById(idCampo);
-                if (el && borrador[idCampo]) {
-                    el.value = borrador[idCampo];
+                if (el) {
+                    if (el.type === 'checkbox') {
+                        el.checked = borrador[idCampo] === true;
+                    } else if (borrador[idCampo] !== undefined && borrador[idCampo] !== null) {
+                        el.value = borrador[idCampo];
+                    }
                 }
             });
         } catch (e) {
@@ -3053,18 +3174,21 @@ function mostrarFichaToner(toner, pushToHistory = true) {
             .then(function(res) { return res.json(); })
             .then(function(maquinas) {
                 if (maquinas && maquinas.length > 0) {
-                    let htmlList = '<div class="list-group bg-dark border-secondary">';
-                    maquinas.forEach(function(m, idx) {
-                        htmlList += '<button type="button" class="list-group-item list-group-item-action bg-dark text-white border-secondary d-flex justify-content-between align-items-center py-2" onclick="seleccionarMaquinaCompatible(\'' + m.marca + '\', \'' + m.modelo + '\', \'' + toner.modelo + '\', ' + idx + ')">';
-                        htmlList += '  <span><i class="bi bi-printer-fill text-accent me-2"></i><strong>' + m.marca + '</strong> ' + m.modelo + '</span>';
-                        htmlList += '  <i class="bi bi-chevron-down text-secondary fs-5"></i>';
-                        htmlList += '</button>';
-                        htmlList += '<div id="installOpts_' + idx + '" class="d-none p-3 bg-card border-top border-secondary text-center">';
-                        htmlList += '  <button class="btn btn-accent btn-sm" onclick="redigirAOpcionesInstalacion(\'' + m.marca + '\', \'' + m.modelo + '\', \'' + toner.modelo + '\', \'' + toner.nivelToner + '\')">';
-                        htmlList += '    <i class="bi bi-plus-circle me-1"></i>Añadir a máquina';
-                        htmlList += '  </button>';
-                        htmlList += '</div>';
+                    let htmlList = '<select class="form-select form-select-lg" id="selectMaquinasCompatibles" style="--bs-bg-opacity: 1; background-color: white !important; color: black !important; color-scheme: light;" onchange="onCambiarMaquinaCompatible(this)">';
+                    htmlList += '  <option value="" style="background-color: white !important; color: black !important;">-- Seleccionar máquina compatible (' + maquinas.length + ') --</option>';
+                    maquinas.forEach(function(m) {
+                        htmlList += '  <option value="' + m.marca + '|' + m.modelo + '" style="background-color: white !important; color: black !important;">' + m.marca + ' ' + m.modelo + '</option>';
                     });
+                    htmlList += '</select>';
+                    htmlList += '<div id="installOptsToner" class="d-none mt-3 p-3 bg-card border border-secondary text-center rounded">';
+                    htmlList += '  <p class="text-white mb-2" id="txtMaquinaSeleccionadaCompat"></p>';
+                    htmlList += '  <div id="loadingAddMaquinaToner" class="d-none my-2 text-center">';
+                    htmlList += '    <div class="spinner-border spinner-border-sm text-accent me-2" role="status" aria-hidden="true"></div>';
+                    htmlList += '    <span class="fw-bold text-accent">PREPARANDO MÁQUINA...</span>';
+                    htmlList += '  </div>';
+                    htmlList += '  <button id="btnConfirmAddMaquinaToner" class="btn btn-accent btn-sm" onclick="ejecutarAddMaquinaToner(' + toner.id + ', \'' + encodeURIComponent(toner.modelo || '') + '\', \'' + (toner.nivelToner || '') + '\')">';
+                    htmlList += '    <i class="bi bi-plus-circle me-1"></i>Añadir a máquina';
+                    htmlList += '  </button>';
                     htmlList += '</div>';
                     compatiblesList.innerHTML = htmlList;
                 } else {
@@ -3088,6 +3212,64 @@ function mostrarFichaToner(toner, pushToHistory = true) {
     };
 
     mostrarVista('fichaToner', pushToHistory, toner);
+}
+
+/**
+ * Maneja la selección de una máquina compatible en la ficha de tóner.
+ */
+function onCambiarMaquinaCompatible(selectEl) {
+    const val = selectEl.value;
+    const optsDiv = document.getElementById('installOptsToner');
+    const txtDiv = document.getElementById('txtMaquinaSeleccionadaCompat');
+    if (val && optsDiv && txtDiv) {
+        const parts = val.split('|');
+        txtDiv.textContent = 'Máquina seleccionada: ' + (parts[0] || '') + ' ' + (parts[1] || '');
+        optsDiv.classList.remove('d-none');
+    } else if (optsDiv) {
+        optsDiv.classList.add('d-none');
+    }
+}
+
+/**
+ * Ejecuta la animación de carga 'PREPARANDO MÁQUINA...' y la redirección tras 2 segundos.
+ */
+function ejecutarAddMaquinaToner(tonerId, tonerModeloEnc, tonerNivel) {
+    const selectEl = document.getElementById('selectMaquinasCompatibles');
+    if (!selectEl || !selectEl.value) {
+        mostrarToast('Seleccione una máquina compatible primero.', 'warning');
+        return;
+    }
+
+    const parts = selectEl.value.split('|');
+    const marca = parts[0] || '';
+    const modelo = parts[1] || '';
+    const tonerModelo = decodeURIComponent(tonerModeloEnc || '');
+
+    // Deshabilitar selector y reemplazar botón por el loader 'PREPARANDO MÁQUINA...'
+    selectEl.disabled = true;
+    const btn = document.getElementById('btnConfirmAddMaquinaToner');
+    const loadingDiv = document.getElementById('loadingAddMaquinaToner');
+    if (btn) btn.classList.add('d-none');
+    if (loadingDiv) loadingDiv.classList.remove('d-none');
+
+    setTimeout(function() {
+        const params = new URLSearchParams();
+        params.set('tonerId', tonerId);
+        params.set('marca', marca);
+        params.set('modelo', modelo);
+        params.set('toner', tonerModelo);
+        if (tonerNivel) {
+            params.set('nivel', tonerNivel.replace('%', ''));
+        }
+
+        window.location.hash = 'formMaquina?' + params.toString();
+
+        document.getElementById('maqId').value = '';
+        document.getElementById('formMaquina').reset();
+
+        mostrarVista('formMaquina', true, { marca: marca, modelo: modelo, toner: tonerModelo, nivel: tonerNivel, tonerId: tonerId });
+        aplicarParametrosUrlFormMaquina();
+    }, 2000);
 }
 
 /**
@@ -3595,8 +3777,9 @@ function aplicarParametrosUrlFormMaquina() {
     const model = params.get('modelo');
     const toner = params.get('toner');
     const nivel = params.get('nivel');
+    const tonerId = params.get('tonerId');
 
-    if (brand || model || toner || nivel) {
+    if (brand || model || toner || nivel || tonerId) {
         const maqId = document.getElementById('maqId').value;
         if (!maqId) { // Solo en modo alta (nueva máquina)
             if (brand) {
@@ -3615,6 +3798,10 @@ function aplicarParametrosUrlFormMaquina() {
                     nivelStr += '%';
                 }
                 document.getElementById('maqNivelToner').value = nivelStr;
+            }
+            if (tonerId) {
+                const hiddenTonerId = document.getElementById('maqTonerId');
+                if (hiddenTonerId) hiddenTonerId.value = tonerId;
             }
         }
     }
