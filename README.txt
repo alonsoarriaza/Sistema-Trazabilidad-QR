@@ -99,7 +99,6 @@ necesario seleccionar el Rol, ingresar el Nombre de Usuario y la Contraseña.
   💾 Guardado Local de Sesiones y Borradores:
      Toda la sesión activa y los borradores de los formularios se persisten 
      de manera local utilizando LocalStorage. Esto previene cualquier pérdida 
-     de información debido a fallos de red o recargas accidentales del 
+     de información debido a fallos de red o recargas accidental del 
      navegador, especialmente optimizado para entornos móviles.
 ================================================================================
-

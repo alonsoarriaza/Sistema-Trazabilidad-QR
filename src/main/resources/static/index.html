@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="Sistema de Gestión de Inventario y techcorp QR - Taller techcorp">
-    <title>techcorp - Gestión de Inventario QR</title>
+    <meta name="description" content="Sistema de Gestión de Inventario y coanda QR - Taller coanda">
+    <title>coanda - Gestión de Inventario QR</title>
     <script>
         (function() {
-            const sessionStr = localStorage.getItem('techcorp_session');
+            const sessionStr = localStorage.getItem('coanda_session');
             if (!sessionStr) {
                 window.location.href = '/login.html';
                 return;
@@ -19,7 +19,7 @@
                     window.location.href = '/comercial.html';
                 }
             } catch (e) {
-                localStorage.removeItem('techcorp_session');
+                localStorage.removeItem('coanda_session');
                 window.location.href = '/login.html';
             }
         })();
@@ -39,11 +39,11 @@
 
     <!-- ═══════════════════════════════════════════════════════════
          BARRA DE NAVEGACIÓN SUPERIOR
-         Barra fija con el logotipo de techcorp y el menú principal.
+         Barra fija con el logotipo de coanda y el menú principal.
          Se utiliza el componente navbar de Bootstrap con clase
          navbar-dark para contraste sobre el fondo oscuro.
          ═══════════════════════════════════════════════════════════ -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-techcorp fixed-top shadow">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-coanda fixed-top shadow">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-white fs-4" href="#" onclick="mostrarVista('inicio')">
                 <i class="bi bi-qr-code-scan me-2 animate-pulse"></i>Control de Almacén
@@ -111,8 +111,8 @@
                 <div class="logo-container mb-4">
                     <i class="bi bi-qr-code-scan text-accent display-1 animate-pulse"></i>
                 </div>
-                <h1 class="h2 fw-bold text-white mb-2">Taller techcorp</h1>
-                <p class="text-secondary mb-5">Gestión de Inventario y techcorp QR</p>
+                <h1 class="h2 fw-bold text-white mb-2">Taller coanda</h1>
+                <p class="text-secondary mb-5">Gestión de Inventario y coanda QR</p>
 
                 <div class="row g-4 justify-content-center">
                     <div class="col-12 col-md-8 col-lg-6">
@@ -206,7 +206,6 @@
                 <!-- ID oculto para edición -->
                 <input type="hidden" id="maqId">
                 <input type="hidden" id="maqPreparadaComercial">
-                <input type="hidden" id="maqTonerId">
 
                 <div class="card bg-card mb-3">
                     <div class="card-header bg-header">
@@ -260,14 +259,6 @@
                                 <input type="number"
                                     class="form-control form-control-lg bg-input text-white border-secondary"
                                     id="maqCopiasColor" min="0" placeholder="0">
-                            </div>
-                            <div class="col-md-6 mb-3 d-flex align-items-center">
-                                <div class="form-check form-switch mt-2">
-                                    <input class="form-check-input" type="checkbox" id="maqEsColor">
-                                    <label class="form-check-label text-light fw-bold" for="maqEsColor">
-                                        <i class="bi bi-palette me-1 text-accent"></i>Color
-                                    </label>
-                                </div>
                             </div>
                         </div>
 
@@ -401,22 +392,9 @@
                     <i class="bi bi-gear-fill me-2"></i>Gestión / Extracción de Piezas
                 </div>
                 <div class="card-body">
-                    <div class="row g-3 mb-3 p-3 bg-dark-50 rounded border border-secondary align-items-center">
-                        <div class="col-md-4">
-                            <span class="text-secondary small d-block">Marca:</span>
-                            <span id="extHeaderMarca" class="fw-bold text-white fs-6">-</span>
-                        </div>
-                        <div class="col-md-4">
-                            <span class="text-secondary small d-block">Modelo:</span>
-                            <span id="extHeaderModelo" class="fw-bold text-white fs-6">-</span>
-                        </div>
-                        <div class="col-md-4">
-                            <span class="text-secondary small d-block">Número de Serie:</span>
-                            <span id="extHeaderSerie" class="fw-bold text-white fs-6">-</span>
-                        </div>
-                    </div>
                     <p class="text-secondary mb-3">
-                        Marque los componentes que se van a extraer de esta máquina. Las piezas ya extraídas aparecerán abajo.
+                        Marque los componentes que se van a extraer de esta máquina. Las piezas ya extraídas aparecerán
+                        abajo.
                     </p>
                     <div id="listaComponentesMaquina" class="d-flex flex-column gap-3">
                         <!-- Rellenado dinámicamente -->
@@ -482,20 +460,17 @@
                                 <select class="form-select form-select-lg bg-input text-white border-secondary"
                                     id="pzaTipoPieza" required>
                                     <option value="">Seleccionar...</option>
-                                    <option value="TAMBOR">Tambor</option>
-                                    <option value="REVELADOR">Revelador</option>
-                                    <option value="Tóner">Tóner</option>
-                                    <option value="PLACA ALTA">Placa Alta</option>
-                                    <option value="PLACA PRINCIPAL">Placa Principal</option>
-                                    <option value="ENGINE">Engine</option>
-                                    <option value="PLACA DE TRANSFERENCIA">Placa de Transferencia</option>
-                                    <option value="FUENTE DE ALIMENTACIÓN">Fuente de Alimentación</option>
-                                    <option value="DP">DP</option>
-                                    <option value="PLACA CONTROLADORA">Placa Controladora</option>
-                                    <option value="PUERTA LATERAL">Puerta Lateral</option>
-                                    <option value="PUERTA FRONTAL">Puerta Frontal</option>
-                                    <option value="CAJON">Cajón</option>
-                                    <option value="PANTALLA">Pantalla</option>
+                                    <option value="Fusor">Fusor</option>
+                                    <option value="Rodillo de presión">Rodillo de presión</option>
+                                    <option value="Rodillo de calor">Rodillo de calor</option>
+                                    <option value="Placa controladora">Placa controladora</option>
+                                    <option value="Bandeja superior">Bandeja superior</option>
+                                    <option value="Bandeja inferior">Bandeja inferior</option>
+                                    <option value="Tambor">Tambor</option>
+                                    <option value="Unidad de imagen">Unidad de imagen</option>
+                                    <option value="Motor principal">Motor principal</option>
+                                    <option value="Fuente de alimentación">Fuente de alimentación</option>
+                                    <option value="Panel de control">Panel de control</option>
                                     <option value="Otro">Otro</option>
                                 </select>
                             </div>
@@ -518,7 +493,7 @@
 
                 <div class="card bg-card mb-3">
                     <div class="card-header bg-header">
-                        <i class="bi bi-link-45deg me-2"></i>techcorp (Máquina de Origen)
+                        <i class="bi bi-link-45deg me-2"></i>coanda (Máquina de Origen)
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -800,20 +775,12 @@
                     <select class="form-select form-select-lg bg-input text-white border-secondary" id="filtroTipoPieza"
                         onchange="filtrarPiezas()">
                         <option value="">Tipo (Todos)</option>
-                        <option value="TAMBOR">Tambor</option>
-                        <option value="REVELADOR">Revelador</option>
-                        <option value="Tóner">Tóner</option>
-                        <option value="PLACA ALTA">Placa Alta</option>
-                        <option value="PLACA PRINCIPAL">Placa Principal</option>
-                        <option value="ENGINE">Engine</option>
-                        <option value="PLACA DE TRANSFERENCIA">Placa de Transferencia</option>
-                        <option value="FUENTE DE ALIMENTACIÓN">Fuente de Alimentación</option>
-                        <option value="DP">DP</option>
-                        <option value="PLACA CONTROLADORA">Placa Controladora</option>
-                        <option value="PUERTA LATERAL">Puerta Lateral</option>
-                        <option value="PUERTA FRONTAL">Puerta Frontal</option>
-                        <option value="CAJON">Cajón</option>
-                        <option value="PANTALLA">Pantalla</option>
+                        <option value="Fusor">Fusor</option>
+                        <option value="Rodillo de presión">Rodillo de presión</option>
+                        <option value="Rodillo de calor">Rodillo de calor</option>
+                        <option value="Placa controladora">Placa controladora</option>
+                        <option value="Tambor">Tambor</option>
+                        <option value="Unidad de imagen">Unidad de imagen</option>
                     </select>
                 </div>
             </div>
@@ -1052,7 +1019,7 @@
     <footer class="site-footer">
         <div class="container-fluid">
             <span><span class="text-negro">Web creada y gestionada por </span><span class="author-verde">Alonso Feria
-                    Arriaza</span><span class="text-negro"> — techcorp </span><span class="author-verde">©
+                    Arriaza</span><span class="text-negro"> — coanda </span><span class="author-verde">©
                     2026</span></span>
         </div>
     </footer>
@@ -1166,8 +1133,6 @@
                     <div class="modal-body">
                         <input type="hidden" id="extTipoPieza">
                         <input type="hidden" id="extMaquinaSerie">
-                        <input type="hidden" id="extColorVariante">
-                        <input type="hidden" id="extReferencia">
 
                         <div class="mb-3">
                             <label for="extMotivo" class="form-label text-dark fw-bold">Motivo / Destino de
@@ -1289,5 +1254,4 @@
 </body>
 
 </html>
-
 

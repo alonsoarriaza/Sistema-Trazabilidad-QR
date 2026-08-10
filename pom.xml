@@ -13,7 +13,7 @@
         <relativePath />
     </parent>
 
-    <groupId>com.techcorp.almacen</groupId>
+    <groupId>com.coanda.almacen</groupId>
     <artifactId>proyecto.AlonsoFeria</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>proyecto.AlonsoFeria</name>
@@ -84,5 +84,4 @@
 
 
 </project>
-
 
