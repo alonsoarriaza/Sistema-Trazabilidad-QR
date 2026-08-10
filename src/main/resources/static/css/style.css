@@ -562,5 +562,42 @@ input, select, textarea {
     transform: translateY(1px) !important;
 }
 
+/* ─────────── Optimización UX Móvil para Desplegables y Formularios ─────────── */
+@media (max-width: 768px) {
+    /* Prevenir zoom automático molesto en iOS y Android ajustando tamaño base a 16px min */
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        min-height: 44px !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    /* Opciones de desplegables <option> con amplio espacio táctil y alto contraste */
+    select option {
+        padding: 12px 14px !important;
+        font-size: 16px !important;
+        background-color: #ffffff !important;
+        color: #2e2e2e !important;
+    }
+
+    /* Botones de acción móvil con altura táctil recomendada */
+    .btn {
+        min-height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Selector de máquinas compatibles en ficha de tóner adaptable */
+    #selectMaquinasCompatibles {
+        font-size: 15px !important;
+        min-height: 48px !important;
+    }
+}
+
 
 

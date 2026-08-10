@@ -5,11 +5,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "historial_movimientos")
+@Table(name = "historial_movimientos", indexes = {
+    @Index(name = "idx_hm_entidad", columnList = "tipo_entidad, entidad_id"),
+    @Index(name = "idx_hm_fecha", columnList = "fecha")
+})
 public class HistorialMovimiento {
 
     @Id
